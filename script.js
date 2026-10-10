@@ -4329,7 +4329,8 @@ if (likeStoryButton) {
 
                 if (error) throw error;
 
-                updateLikeButton(false);
+               updateLikeButton(false);
+await loadStoryLikeCount();
             } else {
                 const { error } = await supabaseClient
                     .from("story_likes")
@@ -4347,6 +4348,7 @@ if (likeStoryButton) {
                 if (error) throw error;
 
                 updateLikeButton(true);
+await loadStoryLikeCount();
             }
         } catch (error) {
             console.error("Story like error:", error);
