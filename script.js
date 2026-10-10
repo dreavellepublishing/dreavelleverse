@@ -4292,7 +4292,8 @@ if (likeStoryButton) {
         return;
     }
 
-    countElement.textContent = `${count ?? 0} likes`;
+    const totalLikes = count ?? 0;
+countElement.textContent = `${totalLikes} ${totalLikes === 1 ? "like" : "likes"}`;
 }
 
 loadStoryLikeCount();
