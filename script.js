@@ -4276,6 +4276,26 @@ if (likeStoryButton) {
 
         likeStoryButton.dataset.liked = isLiked ? "true" : "false";
     }
+    async function loadStoryLikeCount() {
+    if (!likeStoryId) return;
+
+    const countElement = document.querySelector("#story-like-count");
+    if (!countElement) return;
+
+    const { count, error } = await supabaseClient
+        .from("story_likes")
+        .select("*", { count: "exact", head: true })
+        .eq("story_id", likeStoryId);
+
+    if (error) {
+        console.error("Error loading story like count:", error);
+        return;
+    }
+
+    countElement.textContent = `${count ?? 0} likes`;
+}
+
+loadStoryLikeCount();
 
     async function loadStoryLike() {
         if (!likeStoryId) return;
@@ -4348,7 +4368,6 @@ await loadStoryLikeCount();
                 if (error) throw error;
 
                 updateLikeButton(true);
-await loadStoryLikeCount();
             }
         } catch (error) {
             console.error("Story like error:", error);
