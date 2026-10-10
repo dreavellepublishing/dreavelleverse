@@ -2756,3 +2756,22 @@ header h1 a:active {
 #mark-completed-button:hover {
     opacity: 0.9;
 }
+
+/* Remove from Library Button */
+.library-remove-button {
+    background-color: #ffffff;
+    color: #005b78;
+    border: 2px solid #005b78;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: 0.2s ease;
+}
+
+.library-remove-button:hover {
+    background-color: #005b78;
+    color: #ffffff;
+}
