@@ -2441,6 +2441,35 @@ const addToLibraryButton =
     document.querySelector("#add-to-library-button");
 
 if (addToLibraryButton) {
+      (async function () {
+    const { data: { session } } =
+      await supabaseClient.auth.getSession();
+
+    if (!session) return;
+
+    const storyId =
+      new URLSearchParams(window.location.search).get("id") ||
+      localStorage.getItem("dreavelleVerseStoryId");
+
+    if (!storyId) return;
+
+    const { data, error } = await supabaseClient
+      .from("library")
+      .select("id")
+      .eq("user_id", session.user.id)
+      .eq("story_id", storyId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error checking library status:", error);
+      return;
+    }
+
+    if (data) {
+      addToLibraryButton.textContent = "Added to Library";
+      addToLibraryButton.disabled = true;
+    }
+  })();
     addToLibraryButton.addEventListener(
         "click",
         async function () {
