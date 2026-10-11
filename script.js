@@ -5065,7 +5065,13 @@ if (notificationList) {
   notification => !notification.is_read
 ).length;
 
-const notificationCount = document.querySelector("#notification-count");
+const notificationCount = document.querySelector("#notification-count") || (() => {
+  const badge = document.createElement("span");
+  badge.id = "notification-count";
+  badge.style.cssText = "margin-left:6px;background:#e63946;color:white;border-radius:12px;padding:2px 7px;font-weight:bold;";
+  document.querySelector("#notifications-nav-link")?.appendChild(badge);
+  return badge;
+})();
 
 if (notificationCount) {
   notificationCount.textContent = unreadCount;
