@@ -6457,7 +6457,7 @@ if (settingsSession?.user) {
 
         if (storyNotificationsSetting) {
 
-          const notificationUser = null;
+          const notificationUser = settingsSession?.user;
 
 const notificationPreferenceKey =
     "dreavelleVerseStoryNotificationsEnabled_" +
