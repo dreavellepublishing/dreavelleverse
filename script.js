@@ -728,21 +728,59 @@ localStorage.setItem(
 }
 });
 }
+
 /* Display Story Title in Chapter Editor */
 
 const editorStoryName = document.querySelector(".editor-story-name");
 
 if (editorStoryName) {
+    (async function loadEditorStoryName() {
+        const { data: { session }, error: sessionError } =
+            await supabaseClient.auth.getSession();
 
-    const savedStoryTitle = localStorage.getItem(
-        "dreavelleVerseStoryTitle"
-    );
+        if (sessionError || !session?.user) return;
 
-    if (savedStoryTitle) {
-        editorStoryName.textContent = savedStoryTitle;
-    }
+        const urlStoryId = new URLSearchParams(window.location.search).get("id");
+        let storyId = urlStoryId || localStorage.getItem("dreavelleVerseStoryId");
 
+        if (!storyId) {
+            const { data: latestStory, error: latestError } = await supabaseClient
+                .from("stories")
+                .select("id")
+                .eq("user_id", session.user.id)
+                .order("updated_at", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+            if (latestError) {
+                console.error("Could not find editor story:", latestError);
+                return;
+            }
+            storyId = latestStory?.id;
+        }
+
+        if (!storyId) return;
+
+        const { data: story, error } = await supabaseClient
+            .from("stories")
+            .select("title")
+            .eq("id", storyId)
+            .eq("user_id", session.user.id)
+            .maybeSingle();
+
+        if (error) {
+            console.error("Could not load editor story title:", error);
+            return;
+        }
+
+        if (!story) return;
+
+        editorStoryName.textContent = story.title || "Untitled Story";
+        localStorage.setItem("dreavelleVerseStoryId", storyId);
+        localStorage.setItem("dreavelleVerseStoryTitle", story.title || "");
+    })();
 }
+
 
 /* Display Story Information on Story Manager */
 
