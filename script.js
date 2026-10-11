@@ -5392,19 +5392,21 @@ if (
 /* Log Out */
 
 if (logoutButton) {
+  logoutButton.addEventListener("click", async function (event) {
+    event.preventDefault();
 
-    logoutButton.addEventListener(
-        "click",
-        function () {
+    const { error } = await supabaseClient.auth.signOut();
 
-            localStorage.setItem(
-                "dreavelleVerseLoggedIn",
-                "false"
-            );
+    if (error) {
+      console.error("Logout failed:", error.message);
+      alert("Logout failed. Please try again.");
+      return;
+    }
 
-            window.location.href = "index.html";
-        }
-    );
+    localStorage.setItem("dreavelleVerseLoggedIn", "false");
+
+    window.location.href = "index.html";
+  });
 }
 
 /* Protect Start Writing */
