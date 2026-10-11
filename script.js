@@ -6449,10 +6449,15 @@ if (settingsSession?.user) {
 
         if (storyNotificationsSetting) {
 
-            const savedNotificationPreference =
-                localStorage.getItem(
-                    "dreavelleVerseStoryNotificationsEnabled"
-                );
+            const { data: { user: notificationUser } } =
+    await supabaseClient.auth.getUser();
+
+const notificationPreferenceKey =
+    "dreavelleVerseStoryNotificationsEnabled_" +
+    (notificationUser?.id || "guest");
+
+const savedNotificationPreference =
+    localStorage.getItem(notificationPreferenceKey);
 
             if (
                 savedNotificationPreference === null
@@ -6472,9 +6477,9 @@ if (settingsSession?.user) {
                 function () {
 
                     localStorage.setItem(
-                        "dreavelleVerseStoryNotificationsEnabled",
-                        storyNotificationsSetting.checked.toString()
-                    );
+    notificationPreferenceKey,
+    storyNotificationsSetting.checked.toString()
+);
                 }
             );
         }
