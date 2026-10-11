@@ -6448,48 +6448,89 @@ if (settingsSession?.user) {
 }
 })();
 
-        /* Notification Preference */
+       
+/* Notification Preference */
+const storyNotificationsSetting =
+    document.querySelector("#story-notifications-setting");
 
-        const storyNotificationsSetting =
-            document.querySelector(
-                "#story-notifications-setting"
-            );
+if (storyNotificationsSetting) {
+    (async function () {
+        const { data: { user }, error: userError } =
+            await supabaseClient.auth.getUser();
 
-        if (storyNotificationsSetting) {
+        if (userError || !user) {
+            storyNotificationsSetting.disabled = true;
+            return;
+        }
 
-          const notificationUser = settingsSession?.user;
+        const preferenceKey =
+            "dreavelleVerseStoryNotificationsEnabled_" + user.id;
 
-const notificationPreferenceKey =
-    "dreavelleVerseStoryNotificationsEnabled_" +
-    (notificationUser?.id || "guest");
+        const savedLocalPreference =
+            localStorage.getItem(preferenceKey);
 
-const savedNotificationPreference =
-    localStorage.getItem(notificationPreferenceKey);
+        const { data: preference, error: loadError } =
+            await supabaseClient
+                .from("notification_preferences")
+                .select("story_updates_enabled")
+                .eq("user_id", user.id)
+                .maybeSingle();
 
-            if (
-                savedNotificationPreference === null
-            ) {
+        if (loadError) {
+            console.error("Failed to load notification preference:", loadError);
+            storyNotificationsSetting.disabled = true;
+            return;
+        }
 
-                storyNotificationsSetting.checked =
-                    true;
+        const enabled = preference
+            ? preference.story_updates_enabled
+            : savedLocalPreference === null
+                ? true
+                : savedLocalPreference === "true";
 
+        storyNotificationsSetting.checked = enabled;
+
+        if (!preference) {
+            const { error: initialSaveError } =
+                await supabaseClient
+                    .from("notification_preferences")
+                    .upsert({
+                        user_id: user.id,
+                        story_updates_enabled: enabled
+                    }, { onConflict: "user_id" });
+
+            if (initialSaveError) {
+                console.error("Failed to save initial preference:", initialSaveError);
+                storyNotificationsSetting.disabled = true;
+                return;
+            }
+        }
+
+        storyNotificationsSetting.addEventListener("change", async function () {
+            const enabled = storyNotificationsSetting.checked;
+
+            storyNotificationsSetting.disabled = true;
+
+            const { error } = await supabaseClient
+                .from("notification_preferences")
+                .upsert({
+                    user_id: user.id,
+                    story_updates_enabled: enabled,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: "user_id" });
+
+            if (error) {
+                console.error("Failed to save notification preference:", error);
+                storyNotificationsSetting.checked = !enabled;
+                alert("Could not save your notification setting.");
             } else {
-
-                storyNotificationsSetting.checked =
-                    savedNotificationPreference === "true";
+                localStorage.setItem(preferenceKey, String(enabled));
             }
 
-            storyNotificationsSetting.addEventListener(
-                "change",
-                function () {
-
-                    localStorage.setItem(
-    notificationPreferenceKey,
-    storyNotificationsSetting.checked.toString()
-);
-                }
-            );
-        }
+            storyNotificationsSetting.disabled = false;
+        });
+    })();
+}
 
 
         /* Settings Log Out */
