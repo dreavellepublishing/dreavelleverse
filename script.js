@@ -5061,6 +5061,16 @@ if (notificationList) {
     }
 
     notificationList.replaceChildren();
+    const unreadCount = notifications.filter(
+  notification => !notification.is_read
+).length;
+
+const notificationCount = document.querySelector("#notification-count");
+
+if (notificationCount) {
+  notificationCount.textContent = unreadCount;
+  notificationCount.hidden = unreadCount === 0;
+}
 
     if (!notifications || notifications.length === 0) {
       notificationList.innerHTML = `
