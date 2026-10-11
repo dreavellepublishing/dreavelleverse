@@ -6457,8 +6457,7 @@ if (settingsSession?.user) {
 
         if (storyNotificationsSetting) {
 
-            const { data: { user: notificationUser } } =
-    await supabaseClient.auth.getUser();
+          const notificationUser = null;
 
 const notificationPreferenceKey =
     "dreavelleVerseStoryNotificationsEnabled_" +
