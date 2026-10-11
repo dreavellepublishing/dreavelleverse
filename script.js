@@ -4997,87 +4997,95 @@ if (error) {
 
 /* Notifications */
 
-const notificationList = document.querySelector(
-    "#notification-list"
-);
+
+const notificationList = document.querySelector("#notification-list");
 
 if (notificationList) {
-    (async function () {
+  (async function () {
+    const { data: { user }, error: authError } =
+      await supabaseClient.auth.getUser();
 
-    const savedNotifications = JSON.parse(
-        localStorage.getItem(
-           `dreavelleVerseNotifications_${(await supabaseClient.auth.getUser()).data.user?.id}`
-        ) || "[]"
-    );
-
-    if (savedNotifications.length === 0) {
-
-        notificationList.innerHTML = `
-            <div class="notification-empty">
-                <p>🔔 No notifications yet.</p>
-                <span>
-                    Updates from stories you follow will appear here.
-                </span>
-            </div>
-        `;
-
+    if (authError || !user) {
+      notificationList.textContent = "Please log in to view notifications.";
+      return;
     }
-    else {
 
-    savedNotifications.forEach(
-        function (notification) {
+    const { data: notifications, error } = await supabaseClient
+      .from("notifications")
+      .select("id, story_id, chapter_number, title, message, is_read, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
 
-            const notificationCard =
-                document.createElement("div");
-
-            notificationCard.className =
-                "notification-card";
-
-            notificationCard.innerHTML = `
-            ${notification.read === false
-    ? `<span class="notification-new-badge">NEW</span>`
-    : ""
-}
-                <p class="notification-story-title">
-                    ${notification.storyTitle}
-                </p>
-
-                <h3>
-                    New Chapter Published
-                </h3>
-
-                <p>
-                    Chapter ${notification.chapterNumber}:
-                    ${notification.chapterTitle}
-                </p>
-
-                <p class="notification-time">
-    ${
-        notification.createdAt
-            ? new Date(
-                notification.createdAt
-            ).toLocaleString()
-            : ""
+    if (error) {
+      console.error("Notifications error:", error.message);
+      notificationList.textContent = "Unable to load notifications.";
+      return;
     }
-</p>
 
-                <button
-                    type="button"
-                    class="notification-read-button"
-                    data-chapter="${notification.chapterNumber}"
-                >
-                    Read Chapter
-                </button>
-            `;
+    notificationList.replaceChildren();
 
-            notificationList.appendChild(
-                notificationCard
-            );
+    if (!notifications || notifications.length === 0) {
+      notificationList.innerHTML = `
+        <div class="notification-empty">
+          <p>🔔 No notifications yet.</p>
+          <span>Updates from stories you follow will appear here.</span>
+        </div>
+      `;
+      return;
+    }
+
+    notifications.forEach(function (notification) {
+      const card = document.createElement("div");
+      card.className = "notification-card";
+
+      if (!notification.is_read) {
+        const badge = document.createElement("span");
+        badge.className = "notification-new-badge";
+        badge.textContent = "NEW";
+        card.appendChild(badge);
+      }
+
+      const title = document.createElement("p");
+      title.className = "notification-story-title";
+      title.textContent = notification.title;
+
+      const heading = document.createElement("h3");
+      heading.textContent = "New Chapter Published";
+
+      const message = document.createElement("p");
+      message.textContent = notification.message;
+
+      const date = document.createElement("p");
+      date.textContent = new Date(notification.created_at).toLocaleString();
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "notification-read-button";
+      button.textContent = "Read Chapter";
+
+      button.addEventListener("click", async function () {
+        const { error: updateError } = await supabaseClient
+          .from("notifications")
+          .update({ is_read: true })
+          .eq("id", notification.id)
+          .eq("user_id", user.id);
+
+        if (updateError) {
+          console.error("Mark notification read:", updateError.message);
+          return;
         }
-    );
 
-}
-    })();
+        window.location.href =
+          "read-chapter.html?id=" +
+          encodeURIComponent(notification.story_id) +
+          "&chapter=" +
+          encodeURIComponent(notification.chapter_number);
+      });
+
+      card.append(title, heading, message, date, button);
+      notificationList.appendChild(card);
+    });
+  })();
 }
 
 /* Notification Read Chapter */
