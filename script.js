@@ -1076,10 +1076,14 @@ if (publishChapterButton) {
                     ) || "[]"
                 );
 
-                const storyNotificationsEnabled =
-                    localStorage.getItem(
-                        "dreavelleVerseStoryNotificationsEnabled"
-                    ) !== "false";
+                const { data: { user: notificationPreferenceUser } } =
+    await supabaseClient.auth.getUser();
+
+const storyNotificationsEnabled =
+    localStorage.getItem(
+        "dreavelleVerseStoryNotificationsEnabled_" +
+        (notificationPreferenceUser?.id || "guest")
+    ) !== "false";
 
                 const notificationAlreadyExists =
                     notifications.some(
@@ -4060,9 +4064,13 @@ if (error) {
    
     /* Create Notification for Automatically Published Chapter */
 
+const { data: { user: scheduledNotificationUser } } =
+    await supabaseClient.auth.getUser();
+
 const storyNotificationsEnabled =
     localStorage.getItem(
-        "dreavelleVerseStoryNotificationsEnabled"
+        "dreavelleVerseStoryNotificationsEnabled_" +
+        (scheduledNotificationUser?.id || "guest")
     ) !== "false";
 
 if (storyNotificationsEnabled) {
