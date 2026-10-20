@@ -63,6 +63,10 @@
                 Discover new worlds, unforgettable characters,
                 and stories waiting to become part of yours.
             </p>
+<div class="discover-search-tabs" role="group" aria-label="Search category">
+<button type="button" id="search-stories-tab" class="active" aria-pressed="true">Search Stories</button>
+<button type="button" id="search-users-tab" aria-pressed="false">Search Users</button>
+</div>
 <div class="story-search">
     <input
         type="text"
@@ -75,7 +79,12 @@
 </div>
         </section>
 
-        <section class="featured-section">
+        <section id="discover-users-section" class="featured-section" hidden>
+<div class="section-heading"><h2>Find Readers &amp; Writers</h2><p>Search for people by their display name.</p></div>
+<div id="discover-users-results" class="discover-users-results" role="status" aria-live="polite">Enter a name above to find people.</div>
+</section>
+
+        <section class="featured-section" id="discover-stories-section">
 
     <div class="section-heading">
         <h2>Featured Stories</h2>

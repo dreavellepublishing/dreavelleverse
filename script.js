@@ -2867,6 +2867,102 @@ if (discoverSearchInput) {
     );
 }
 
+/* Discover user search: independent of the existing story search. */
+const discoverUsersTab = document.querySelector("#search-users-tab");
+const discoverStoriesTab = document.querySelector("#search-stories-tab");
+const discoverUsersSection = document.querySelector("#discover-users-section");
+const discoverStoriesSection = document.querySelector("#discover-stories-section");
+const discoverUsersResults = document.querySelector("#discover-users-results");
+let discoverSearchMode = "stories";
+
+function setDiscoverSearchMode(mode) {
+    discoverSearchMode = mode;
+    const users = mode === "users";
+    discoverUsersSection.hidden = !users;
+    discoverStoriesSection.hidden = users;
+    discoverUsersTab.classList.toggle("active", users);
+    discoverStoriesTab.classList.toggle("active", !users);
+    discoverUsersTab.setAttribute("aria-pressed", String(users));
+    discoverStoriesTab.setAttribute("aria-pressed", String(!users));
+    discoverSearchInput.placeholder = users ? "Search by username..." : "Search by title, author, or genre...";
+    discoverSearchInput.value = "";
+    if (!users) searchDiscover();
+    else discoverUsersResults.textContent = "Enter a name above to find people.";
+}
+
+async function searchDiscoverUsers() {
+    const name = discoverSearchInput.value.trim();
+    discoverUsersResults.replaceChildren();
+    if (!name) {
+        discoverUsersResults.textContent = "Enter a username to search.";
+        return;
+    }
+    discoverUsersResults.textContent = "Searching users...";
+    // Escape SQL LIKE wildcards so usernames are searched literally.
+    const pattern = name.replace(/[\\%_]/g, "\\$&");
+    const { data: people, error } = await supabaseClient
+        .from("profiles")
+        .select("id, display_name, avatar_url, bio")
+        .ilike("display_name", `%${pattern}%`)
+        .order("display_name", { ascending: true })
+        .limit(30);
+    discoverUsersResults.replaceChildren();
+    if (error) {
+        console.error("User search error:", error);
+        discoverUsersResults.textContent = "Unable to search users. Check the profiles table API access and SELECT policy.";
+        return;
+    }
+    if (!people?.length) {
+        discoverUsersResults.textContent = "No users found with that name.";
+        return;
+    }
+    for (const person of people) {
+        const card = document.createElement("article");
+        card.className = "discover-user-card";
+        const avatar = document.createElement("div");
+        avatar.className = "discover-user-avatar";
+        if (person.avatar_url && /^https:\/\//i.test(person.avatar_url)) {
+            const img = document.createElement("img");
+            img.src = person.avatar_url;
+            img.alt = "";
+            avatar.appendChild(img);
+        } else {
+            avatar.textContent = (person.display_name || "U").charAt(0).toUpperCase();
+        }
+        const info = document.createElement("div");
+        info.className = "discover-user-info";
+        const heading = document.createElement("h3");
+        heading.textContent = person.display_name || "Reader";
+        const bio = document.createElement("p");
+        bio.textContent = person.bio || "DreavelleVerse member";
+        info.append(heading, bio);
+        const link = document.createElement("a");
+        link.className = "start-reading-button";
+        link.href = `public-profile.html?id=${encodeURIComponent(person.id)}`;
+        link.textContent = "View Profile";
+        card.append(avatar, info, link);
+        discoverUsersResults.appendChild(card);
+    }
+}
+
+if (discoverUsersTab && discoverStoriesTab && discoverSearchInput && discoverSearchButton) {
+    discoverUsersTab.addEventListener("click", () => setDiscoverSearchMode("users"));
+    discoverStoriesTab.addEventListener("click", () => setDiscoverSearchMode("stories"));
+    // Capture clicks before the existing story-only listener runs.
+    discoverSearchButton.addEventListener("click", (event) => {
+        if (discoverSearchMode === "users") {
+            event.stopImmediatePropagation();
+            searchDiscoverUsers();
+        }
+    }, true);
+    discoverSearchInput.addEventListener("keydown", (event) => {
+        if (discoverSearchMode === "users" && event.key === "Enter") {
+            event.stopImmediatePropagation();
+            searchDiscoverUsers();
+        }
+    }, true);
+}
+
 /* Remember Reader Progress */
 
 document.addEventListener("click", async function (event) {
