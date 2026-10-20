@@ -6,6 +6,7 @@ const supabaseClient = supabase.createClient(
     SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY
 );
+window.supabaseClient = supabaseClient;
 
 const writingArea = document.querySelector(".chapter-writing-area");
 const wordCount = document.querySelector(".word-count");
