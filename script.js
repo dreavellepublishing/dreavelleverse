@@ -543,7 +543,8 @@ const storyTags =
                 author: storyAuthor,
                 description: storyDescription,
                 genre: storyGenre,
-                tags: storyTags
+                tags: storyTags,
+                status: "Draft"
             })
             .select()
             .single();
@@ -1204,6 +1205,24 @@ console.log("Unpublish result:", updatedChapter);
 
             alert("Could not unpublish chapter.");
             return;
+        }
+
+        // Hide a story from Discover when its last published chapter is unpublished.
+        const { data: remainingPublished, error: remainingError } = await supabaseClient
+            .from("chapters")
+            .select("id")
+            .eq("story_id", storyId)
+            .eq("status", "Published")
+            .limit(1);
+        if (remainingError) {
+            console.error("Could not check remaining published chapters:", remainingError);
+        } else if (!remainingPublished?.length) {
+            const { error: draftStoryError } = await supabaseClient
+                .from("stories")
+                .update({ status: "Draft", updated_at: new Date().toISOString() })
+                .eq("id", storyId)
+                .eq("user_id", session.user.id);
+            if (draftStoryError) console.error("Could not change story to Draft:", draftStoryError);
         }
 
         const publishedChapterKey =
@@ -2279,122 +2298,71 @@ if (nextButton) {
 }
 }
 
-/* Discover Stories */
-
-const discoverStories = document.querySelector(
-    "#discover-stories"
-);
-
+/* Discover all public stories that have at least one published chapter. */
+const discoverStories = document.querySelector("#discover-stories");
 if (discoverStories) {
-
-    (async function () {
-        const { data: publishedStories, error: publishedStoriesError } =
-    await supabaseClient
-        .from("stories")
-        .select("id, title, author, description, genre, tags, cover_url")
-        .eq("status", "Published");
-
-console.log("Published stories from Supabase:", publishedStories);
-console.log("Published stories error:", publishedStoriesError);
-
-if (publishedStoriesError) {
-    console.error("Could not load published stories.");
-    return;
-}
-
-if (!publishedStories || publishedStories.length === 0) {
-    discoverStories.innerHTML = "<p>No published stories yet.</p>";
-    return;
-}
-
-const publishedStory = publishedStories[0];
-let storyTitle = publishedStory.title || "Untitled Story";
-let storyAuthor = publishedStory.author || "Unknown Author";
-let storyDescription = publishedStory.description || "";
-let storyGenre = publishedStory.genre || "";
-let storyCover = publishedStory.cover_url || "";
-let storyTags = publishedStory.tags || "";
-
-    const totalChapters = Number(
-        localStorage.getItem(
-            "dreavelleVerseTotalChapters"
-        ) || "1"
-    );
-
-    /* Reader Genre Preferences */
-
-const readerGenrePreferences = JSON.parse(
-    localStorage.getItem(
-        "dreavelleVerseReadingPreferences"
-    ) || "[]"
-);
-
-const matchesReaderPreferences =
-    readerGenrePreferences.length === 0 ||
-    readerGenrePreferences.includes(storyGenre);
-
-    let hasPublishedChapter = false;
-
-if (publishedStory.id) {
-    const { data: publishedChapters, error: chapterError } =
-        await supabaseClient
-            .from("chapters")
-            .select("id")
-            .eq("story_id", publishedStory.id)
-            .eq("status", "Published")
-            .limit(1);
-
-console.log("Published chapters found:", publishedChapters);
-console.log("Chapter query error:", chapterError);
-
-    if (!chapterError && publishedChapters?.length > 0) {
-        hasPublishedChapter = true;
-    }
-}
-
-    if (hasPublishedChapter && matchesReaderPreferences) {
-
-        const storyCard =
-            document.createElement("div");
-
-        storyCard.className =
-            "story-card";
-
-        storyCard.innerHTML = `
-
-            ${storyCover
-    ? `<img src="${storyCover}" class="story-cover-image" alt="${storyTitle} cover">`
-    : `<div class="story-cover-placeholder">Story Cover</div>`
-}
-
-            <h3>
-    ${storyTitle}
-</h3>
-
-<p class="discover-story-author">
-    By ${storyAuthor}
-</p>
-
-            <p>
-                ${storyDescription}
-            </p>
-            <p class="discover-story-genre">
-    Genre: ${storyGenre}
-</p>
-<p class="discover-story-tags">
-    Tags: ${storyTags}
-</p>
-
-           <a href="read-story.html?id=${publishedStory.id}" class="start-reading-button">
-                Start Reading
-            </a>
-
-        `;
-
-        discoverStories.appendChild(
-            storyCard
-        );
-    }
+    (async function loadDiscoverStories() {
+        const { data: stories, error } = await supabaseClient
+            .from("stories")
+            .select("id, title, author, description, genre, tags, cover_url")
+            .eq("status", "Published");
+        if (error) {
+            console.error("Could not load published stories:", error);
+            discoverStories.textContent = "Unable to load stories right now.";
+            return;
+        }
+        const preferences = JSON.parse(localStorage.getItem("dreavelleVerseReadingPreferences") || "[]");
+        discoverStories.replaceChildren();
+        let visibleCount = 0;
+        for (const story of stories || []) {
+            if (preferences.length && !preferences.includes(story.genre || "")) continue;
+            const { data: chapters, error: chapterError } = await supabaseClient
+                .from("chapters")
+                .select("id")
+                .eq("story_id", story.id)
+                .eq("status", "Published")
+                .limit(1);
+            if (chapterError || !chapters?.length) continue;
+            const card = document.createElement("div");
+            card.className = "story-card";
+            if (story.cover_url) {
+                const cover = document.createElement("img");
+                cover.className = "story-cover-image";
+                cover.alt = `${story.title || "Story"} cover`;
+                // Accept only expected remote image URLs.
+                try {
+                    const url = new URL(story.cover_url);
+                    if (["https:", "http:"].includes(url.protocol)) {
+                        cover.src = url.href;
+                        card.appendChild(cover);
+                    }
+                } catch (_) { /* Ignore malformed cover URLs. */ }
+            } else {
+                const placeholder = document.createElement("div");
+                placeholder.className = "story-cover-placeholder";
+                placeholder.textContent = "Story Cover";
+                card.appendChild(placeholder);
+            }
+            function addText(tag, value, className) {
+                const element = document.createElement(tag);
+                if (className) element.className = className;
+                element.textContent = value;
+                card.appendChild(element);
+            }
+            addText("h3", story.title || "Untitled Story");
+            addText("p", `By ${story.author || "Unknown Author"}`, "discover-story-author");
+            addText("p", story.description || "");
+            addText("p", `Genre: ${story.genre || ""}`, "discover-story-genre");
+            addText("p", `Tags: ${story.tags || ""}`, "discover-story-tags");
+            const readLink = document.createElement("a");
+            readLink.href = `read-story.html?id=${encodeURIComponent(story.id)}`;
+            readLink.className = "start-reading-button";
+            readLink.textContent = "Start Reading";
+            card.appendChild(readLink);
+            discoverStories.appendChild(card);
+            visibleCount++;
+        }
+        if (!visibleCount) discoverStories.textContent = "No published stories yet.";
     })();
 }
     /* Display Story Information on Reader Story Page */
@@ -2869,57 +2837,12 @@ const discoverSearchButton = document.querySelector(
 );
 
 function searchDiscover() {
-
-    if (!discoverSearchInput || !discoverStories) {
-        return;
-    }
-
-    const searchText =
-        discoverSearchInput.value.trim().toLowerCase();
-
-    const storyTitle =
-        localStorage.getItem(
-            "dreavelleVerseStoryTitle"
-        ) || "";
-
-    const storyAuthor =
-        localStorage.getItem(
-            "dreavelleVerseStoryAuthor"
-        ) || "";
-
-    const storyGenre =
-        localStorage.getItem(
-            "dreavelleVerseStoryGenre"
-        ) || "";
-
-    const storyTags =
-        localStorage.getItem(
-            "dreavelleVerseStoryTags"
-        ) || "";
-
-    const searchableStoryText = `
-        ${storyTitle}
-        ${storyAuthor}
-        ${storyGenre}
-        ${storyTags}
-    `.toLowerCase();
-
-    const storyCard = discoverStories.querySelector(
-        ".story-card"
-    );
-
-    if (!storyCard) {
-        return;
-    }
-
-    if (
-        searchText === "" ||
-        searchableStoryText.includes(searchText)
-    ) {
-        storyCard.style.display = "";
-    } else {
-        storyCard.style.display = "none";
-    }
+    if (!discoverSearchInput || !discoverStories) return;
+    const searchText = discoverSearchInput.value.trim().toLowerCase();
+    discoverStories.querySelectorAll(".story-card").forEach(card => {
+        card.style.display = !searchText || card.textContent.toLowerCase().includes(searchText)
+            ? "" : "none";
+    });
 }
 
 if (discoverSearchButton) {
@@ -4078,6 +4001,13 @@ if (error) {
     return;
 }
    
+    const { error: scheduledStoryError } = await supabaseClient
+        .from("stories")
+        .update({ status: "Published", updated_at: new Date().toISOString() })
+        .eq("id", storyId)
+        .eq("user_id", session.user.id);
+    if (scheduledStoryError) console.error("Scheduled chapter published but story status update failed:", scheduledStoryError);
+
     /* Create Notification for Automatically Published Chapter */
 
 const { data: { user: scheduledNotificationUser } } =
@@ -5553,26 +5483,61 @@ if (writeNavLink) {
     );
 }
 
-/* Writer Story Button */
+/* Writer dashboard: list the signed-in writer's stories from Supabase. */
+const writerStoryButton = document.querySelector("#writer-story-button");
+const writerStoryList = document.querySelector("#writer-story-list");
 
-const writerStoryButton =
-    document.querySelector("#writer-story-button");
-
-if (writerStoryButton) {
-
-    const existingStoryTitle =
-        localStorage.getItem(
-            "dreavelleVerseStoryTitle"
-        );
-
-    if (existingStoryTitle) {
-
-        writerStoryButton.textContent =
-            "Manage Your Story";
-
-        writerStoryButton.href =
-            "story-manager.html";
-    }
+if (writerStoryButton && writerStoryList) {
+    (async function loadWriterStories() {
+        const { data: { session }, error: authError } =
+            await supabaseClient.auth.getSession();
+        if (authError || !session?.user) {
+            writerStoryList.textContent = "Please log in to manage your stories.";
+            return;
+        }
+        const { data: stories, error } = await supabaseClient
+            .from("stories")
+            .select("id, title, status")
+            .eq("user_id", session.user.id)
+            .order("updated_at", { ascending: false });
+        if (error) {
+            console.error("Could not load writer stories:", error);
+            writerStoryList.textContent = "Could not load your stories. Please try again.";
+            return;
+        }
+        writerStoryButton.textContent = "Create New Story";
+        writerStoryButton.href = "create-story.html";
+        writerStoryList.replaceChildren();
+        if (!stories?.length) {
+            writerStoryList.textContent = "You haven't created a story yet.";
+            return;
+        }
+        const heading = document.createElement("h3");
+        heading.textContent = "Your Stories";
+        writerStoryList.appendChild(heading);
+        for (const story of stories) {
+            const item = document.createElement("div");
+            item.className = "writer-story-item";
+            const title = document.createElement("strong");
+            title.textContent = story.title || "Untitled Story";
+            const status = document.createElement("span");
+            status.textContent = ` (${story.status || "Draft"}) `;
+            const manage = document.createElement("button");
+            manage.type = "button";
+            manage.textContent = "Manage Story";
+            manage.addEventListener("click", () => {
+                localStorage.setItem("dreavelleVerseStoryId", story.id);
+                localStorage.setItem("dreavelleVerseStoryTitle", story.title || "");
+                localStorage.removeItem("dreavelleVerseChapterTitle");
+                localStorage.removeItem("dreavelleVerseChapterContent");
+                localStorage.removeItem("dreavelleVerseChapterStatus");
+                localStorage.setItem("dreavelleVerseCurrentChapter", "1");
+                window.location.href = "story-manager.html";
+            });
+            item.append(title, status, manage);
+            writerStoryList.appendChild(item);
+        }
+    })();
 }
 
 /* Protect Create Story Page */
