@@ -98,9 +98,27 @@
 
 </section>
 
+
+        <section class="featured-section dv-recommendations" aria-labelledby="dv-recommend-title">
+          <div class="section-heading"><h2 id="dv-recommend-title">Recommended for You</h2><p>Meet readers and writers, and discover stories worth reading.</p></div>
+          <h3>Suggested Readers &amp; Writers</h3><div id="dv-suggest-people" class="dv-suggestion-grid" aria-live="polite">Loading suggestions…</div>
+          <h3>Suggested Stories</h3><div id="dv-suggest-stories" class="dv-suggestion-grid" aria-live="polite">Loading suggestions…</div>
+        </section>
+        <section class="featured-section dv-promotions" aria-labelledby="dv-promo-title">
+          <div class="section-heading"><h2 id="dv-promo-title">Story &amp; Author Spotlight</h2><p>Small spotlights, featured promotions and writer-approved collaborations.</p></div>
+          <div id="dv-big-promos" class="dv-promotion-grid dv-big-promos" aria-live="polite"></div>
+          <div id="dv-small-promos" class="dv-promotion-grid" aria-live="polite"></div>
+          <p><a class="start-reading-button" href="promotion-planner.html">Promote your story or plan an update</a></p>
+        </section>
+        <section class="featured-section dv-calendar-section" aria-labelledby="dv-calendar-title">
+          <div class="section-heading"><h2 id="dv-calendar-title">Writer Update &amp; Promotion Calendar</h2><p>Upcoming chapter releases and story promotions.</p></div>
+          <div class="dv-calendar-toolbar"><button type="button" id="dv-calendar-prev" aria-label="Previous month">‹</button><h3 id="dv-calendar-month"></h3><button type="button" id="dv-calendar-next" aria-label="Next month">›</button></div>
+          <div id="dv-calendar" class="dv-calendar" aria-label="Writer update calendar"></div><div id="dv-calendar-events" class="dv-calendar-events" aria-live="polite"></div>
+        </section>
     </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="script.js"></script>
+<script src="discover-extras.js?v=1"></script>
 </body>
 
 </html>

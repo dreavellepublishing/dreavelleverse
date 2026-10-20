@@ -2901,3 +2901,39 @@ header h1 a:active {
 .public-profile-card p { margin:12px 24px; white-space:pre-wrap; }
 .public-profile-card button { background:#0b4f6c; color:white; border:0; border-radius:8px; padding:12px 24px; cursor:pointer; font-weight:bold; }
 .public-profile-card button:disabled { opacity:.6; cursor:wait; }
+.dv-planner [hidden], .dv-recommendations [hidden], .dv-promotions [hidden] {display:none!important}
+
+/* Discover recommendations, promotions and writer calendar */
+.dv-recommendations h3,.dv-promotions h3 {margin:1.5rem 0 .8rem;color:#075071}
+.dv-suggestion-grid,.dv-promotion-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr));gap:1rem;margin:1rem 0 2rem}
+.dv-suggestion-card,.dv-promo-card {background:#fff;border:1px solid #c9e1e8;border-radius:13px;padding:1.1rem;display:flex;flex-direction:column;gap:.65rem;box-shadow:0 3px 10px #003b5010;min-width:0}
+.dv-suggestion-card h4,.dv-promo-card h4 {margin:0;color:#005071;font-size:1.12rem}
+.dv-suggestion-card p,.dv-promo-card p {margin:0;overflow-wrap:anywhere}
+.dv-suggestion-card img,.dv-promo-card img {width:100%;height:150px;object-fit:cover;border-radius:8px}
+.dv-suggestion-card .dv-person-avatar {width:66px;height:66px;border-radius:50%;object-fit:cover}
+.dv-promo-card.dv-large {grid-column:span 2;background:#f3edff;border-color:#b69add}
+.dv-promo-card .dv-promo-tag {font-size:.75rem;font-weight:bold;color:#6a4597;text-transform:uppercase;letter-spacing:.05em}
+.dv-suggestion-card a,.dv-promo-card a {align-self:flex-start}
+.dv-calendar-toolbar {display:flex;align-items:center;justify-content:center;gap:1.2rem;margin:1.5rem 0}
+.dv-calendar-toolbar h3 {margin:0;min-width:12rem;text-align:center}
+.dv-calendar-toolbar button {border:1px solid #a6ccd7;background:white;color:#005071;border-radius:8px;padding:.4rem .9rem;cursor:pointer;font-size:1.3rem}
+.dv-calendar {display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.dv-calendar .dv-day-label {text-align:center;font-weight:bold;color:#005071;padding:.5rem 0;font-size:.85rem}
+.dv-calendar .dv-day {min-height:67px;background:white;border:1px solid #d1e5ea;border-radius:7px;padding:.4rem;text-align:left;display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;cursor:pointer;color:#123b4b}
+.dv-calendar .dv-day:disabled {background:transparent;border:0;cursor:default}
+.dv-calendar .dv-day[aria-pressed="true"] {outline:2px solid #00779c}
+.dv-calendar .dv-day .dv-dot {font-size:.7rem;color:#7045a6;line-height:1.15}
+.dv-calendar-events {padding:1rem 0;min-height:2.5rem}
+.dv-calendar-events p {margin:.35rem 0}
+.dv-planner {max-width:780px;margin:2rem auto;padding:1.5rem;background:white;border-radius:14px}
+.dv-planner form {display:grid;gap:.8rem}
+.dv-planner label {font-weight:600}
+.dv-planner input,.dv-planner select,.dv-planner textarea {width:100%;box-sizing:border-box;padding:.7rem;border:1px solid #b8d3db;border-radius:7px}
+.dv-planner button {padding:.8rem;background:#005476;color:white;border:0;border-radius:8px;cursor:pointer}
+.dv-planner .dv-planner-item {padding:.8rem;border-bottom:1px solid #d8e7eb}
+.dv-manager-promo {margin:1rem 0}
+@media(max-width:640px){.dv-promo-card.dv-large {grid-column:span 1}.dv-calendar .dv-day {min-height:54px;padding:.2rem;font-size:.8rem}.dv-calendar .dv-day .dv-dot {font-size:.58rem}}
+
+.dv-planner [hidden] {display:none!important}
+/* Private writer activity calendar */
+.dv-writing-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;margin:16px 0 24px}.dv-writing-calendar>strong{text-align:center;font-size:.8rem}.dv-writing-day{min-height:76px;border:1px solid #d7e5ec;border-radius:9px;background:#fff;padding:7px;display:flex;flex-direction:column;gap:6px}.dv-writing-day small{font-size:.7rem;line-height:1.25;overflow-wrap:anywhere}.dv-writing-qualified{background:#e6f5eb;border-color:#67ae7b}@media(max-width:600px){.dv-writing-calendar{gap:3px}.dv-writing-day{min-height:65px;padding:3px}.dv-writing-day small{font-size:.58rem}}
