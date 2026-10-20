@@ -5155,7 +5155,8 @@ if (notificationCount) {
       title.textContent = notification.title;
 
       const heading = document.createElement("h3");
-      heading.textContent = "New Chapter Published";
+      const isFollowerNotification = notification.title === "New Follower" && !notification.story_id;
+      heading.textContent = isFollowerNotification ? "Someone followed you" : "New Chapter Published";
 
       const message = document.createElement("p");
       message.textContent = notification.message;
@@ -5166,7 +5167,7 @@ if (notificationCount) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "notification-read-button";
-      button.textContent = "Read Chapter";
+      button.textContent = isFollowerNotification ? "View Profile" : "Read Chapter";
 
       button.addEventListener("click", async function () {
         const { error: updateError } = await supabaseClient
@@ -5180,6 +5181,27 @@ if (notificationCount) {
           return;
         }
 
+        if (isFollowerNotification) {
+          // Follower notifications currently store the display name in the message,
+          // not the follower ID. Only open a profile if the name resolves uniquely.
+          const followerName = (notification.message || "")
+            .replace(/ started following you\.$/, "").trim();
+          if (followerName) {
+            const { data: matches, error: profileError } = await supabaseClient
+              .from("profiles")
+              .select("id, display_name")
+              .eq("display_name", followerName)
+              .limit(2);
+            if (!profileError && matches?.length === 1) {
+              window.location.href = "public-profile.html?id=" +
+                encodeURIComponent(matches[0].id);
+              return;
+            }
+          }
+          // Duplicate/renamed usernames cannot safely identify an account.
+          window.location.href = "discover.html";
+          return;
+        }
         window.location.href =
           "read-chapter.html?id=" +
           encodeURIComponent(notification.story_id) +
