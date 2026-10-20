@@ -5736,114 +5736,76 @@ if (userDisplayName) {
     );
 }
 
-/* Edit Profile */
+/* Edit Profile — save to Supabase */
+const editProfileButton = document.querySelector("#edit-profile-button");
+const editProfileForm = document.querySelector("#edit-profile-form");
+const editDisplayName = document.querySelector("#edit-display-name");
+const saveProfileButton = document.querySelector("#save-profile-button");
+const cancelProfileButton = document.querySelector("#cancel-profile-button");
 
-const editProfileButton =
-    document.querySelector("#edit-profile-button");
+if (editProfileButton && editProfileForm && editDisplayName && saveProfileButton && cancelProfileButton) {
+    editProfileButton.addEventListener("click", function () {
+        // Show the form immediately; do not block the button on a network request.
+        editDisplayName.value = (profileDisplayName?.textContent || "").trim();
+        editProfileForm.style.display = "block";
+        editProfileButton.style.display = "none";
+        editDisplayName.focus();
+    });
 
-const editProfileForm =
-    document.querySelector("#edit-profile-form");
+    cancelProfileButton.addEventListener("click", function () {
+        editProfileForm.style.display = "none";
+        editProfileButton.style.display = "inline-block";
+    });
 
-const editDisplayName =
-    document.querySelector("#edit-display-name");
-
-const saveProfileButton =
-    document.querySelector("#save-profile-button");
-
-const cancelProfileButton =
-    document.querySelector("#cancel-profile-button");
-
-if (
-    editProfileButton &&
-    editProfileForm &&
-    editDisplayName &&
-    saveProfileButton &&
-    cancelProfileButton
-) {
-
-    editProfileButton.addEventListener(
-        "click",
-        function () {
-
-            const savedAccount = JSON.parse(
-                localStorage.getItem(
-                    "dreavelleVerseUserAccount"
-                ) || "null"
-            );
-
-            if (!savedAccount) {
-                return;
-            }
-
-            editDisplayName.value =
-                savedAccount.displayName || "";
-
-            editProfileForm.style.display =
-                "block";
-
-            editProfileButton.style.display =
-                "none";
+    saveProfileButton.addEventListener("click", async function () {
+        const newDisplayName = editDisplayName.value.trim();
+        if (!newDisplayName || newDisplayName.length > 40) {
+            alert("Enter a display name (up to 40 characters)."); return;
         }
-    );
+        saveProfileButton.disabled = true;
+        try {
+            const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+            if (authError || !user) throw authError || new Error("Please log in.");
+            const { data: updated, error } = await supabaseClient.from("profiles")
+                .update({ display_name: newDisplayName }).eq("id", user.id).select("id");
+            if (error) throw error;
+            if (!updated?.length) throw new Error("Profile was not updated. Check Supabase profile permissions.");
+            if (profileDisplayName) profileDisplayName.textContent = newDisplayName;
+            if (userDisplayName) userDisplayName.textContent = newDisplayName;
+            editProfileForm.style.display = "none";
+            editProfileButton.style.display = "inline-block";
+            if (profilePicturePlaceholder && profilePicture?.style.display === "none") {
+                const parts = newDisplayName.split(/\s+/);
+                profilePicturePlaceholder.textContent = (parts.length > 1 ? parts[0][0] + parts[parts.length - 1][0] : parts[0][0]).toUpperCase();
+            }
+        } catch (error) {
+            console.error("Could not save display name:", error);
+            alert("Could not save your name: " + (error?.message || "Unknown error"));
+        } finally { saveProfileButton.disabled = false; }
+    });
+}
 
-    cancelProfileButton.addEventListener(
-        "click",
-        function () {
-
-            editProfileForm.style.display =
-                "none";
-
-            editProfileButton.style.display =
-                "inline-block";
+/* Followers: requires account_follows table and RLS setup */
+if (profilePage) {
+    (async function loadAccountFollowers() {
+        const countElement = document.querySelector("#profile-followers-count");
+        if (!countElement) return;
+        const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+        if (sessionError || !session?.user) {
+            countElement.textContent = "Sign in to see followers";
+            return;
         }
-    );
-
-    saveProfileButton.addEventListener(
-        "click",
-        function () {
-
-            const newDisplayName =
-                editDisplayName.value.trim();
-
-            if (!newDisplayName) {
-                return;
-            }
-
-            const savedAccount = JSON.parse(
-                localStorage.getItem(
-                    "dreavelleVerseUserAccount"
-                ) || "null"
-            );
-
-            if (!savedAccount) {
-                return;
-            }
-
-            savedAccount.displayName =
-                newDisplayName;
-
-            localStorage.setItem(
-                "dreavelleVerseUserAccount",
-                JSON.stringify(savedAccount)
-            );
-
-            if (profileDisplayName) {
-                profileDisplayName.textContent =
-                    newDisplayName;
-            }
-
-            if (userDisplayName) {
-                userDisplayName.textContent =
-                    newDisplayName;
-            }
-
-            editProfileForm.style.display =
-                "none";
-
-            editProfileButton.style.display =
-                "inline-block";
+        const user = session.user;
+        const { count, error } = await supabaseClient.from("account_follows")
+            .select("follower_id", { count: "exact", head: true })
+            .eq("followed_id", user.id);
+        if (error) {
+            console.info("Followers database setup is still needed:", error.message);
+            countElement.textContent = "Followers feature being set up";
+            return;
         }
-    );
+        countElement.textContent = `${count ?? 0} follower${count === 1 ? "" : "s"}`;
+    })();
 }
 
 /* Profile Picture */
@@ -5981,8 +5943,7 @@ const { data: profile, error } =
 
         savedProfilePicture = imageUrl;
 
-        profilePicture.src =
-            imageUrl;
+        profilePicture.src = imageUrl + "?v=" + Date.now();
 
         profilePicture.style.display =
             "block";
@@ -6284,8 +6245,7 @@ if (
             savedProfileCover =
                 coverUrl;
 
-            profileCoverPhoto.src =
-                coverUrl;
+            profileCoverPhoto.src = coverUrl + "?v=" + Date.now();
 
             profileCoverPhoto.style.display =
                 "block";
