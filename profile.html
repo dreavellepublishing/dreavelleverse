@@ -211,11 +211,14 @@
 
 </div>
 
-                <button
-    type="button"
-    id="edit-profile-button"
-    class="edit-profile-button"
->
+                <section class="profile-followers" aria-label="Account followers" style="margin: 18px 0; padding: 14px; border: 1px solid #c9dfe6; border-radius: 10px;">
+                    <h3 style="margin: 0 0 8px;">Followers</h3>
+                    <p style="margin: 0;" id="profile-followers-count" role="status">Loading followers...</p>
+                    <p style="margin: 8px 0 0; font-size: 0.9rem;">Readers and writers can follow accounts.</p>
+                </section>
+
+                <button type="button" id="edit-profile-button" class="edit-profile-button">Edit Profile</button>
+
 <!-- Theme Preference -->
 
 <div class="theme-preference">
@@ -291,9 +294,6 @@
     </div>
 
 </div>
-
-    Edit Profile
-</button>
 
 <div
     id="edit-profile-form"
