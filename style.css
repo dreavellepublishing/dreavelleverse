@@ -2835,3 +2835,47 @@ header h1 a:active {
 #writer-story-list button:hover {
     background: #00799a;
 }
+
+
+/* Forgot Password and Reset Password Forms */
+
+#forgot-password-form,
+#reset-password-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    margin-top: 25px;
+}
+
+#forgot-password-form label,
+#reset-password-form label {
+    display: block;
+    text-align: left;
+    font-weight: 600;
+}
+
+#forgot-password-form input,
+#reset-password-form input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid #b5dce6;
+    border-radius: 7px;
+    font-size: 16px;
+}
+
+#forgot-password-form .signup-button,
+#reset-password-form .signup-button {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+#forgot-password-form .signup-message,
+#reset-password-form .signup-message {
+    text-align: center;
+}
