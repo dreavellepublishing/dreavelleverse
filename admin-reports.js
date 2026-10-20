@@ -57,6 +57,7 @@ async function loadReports() {
 async function init() {
   try {
     const { data: { user }, error: authError } = await adminDb.auth.getUser();
+    console.log("Admin navigation check:", { userFound: !!user, linkFound: !!authLink });
     if (user && authLink) {
       authLink.textContent = "Log Out";
       authLink.href = "#";
