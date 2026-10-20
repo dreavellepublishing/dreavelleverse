@@ -1013,7 +1013,23 @@ if (publishChapterButton) {
             );
             return;
         }
+const { error: storyPublishError } = await supabaseClient
+    .from("stories")
+    .update({
+        status: "Published",
+        updated_at: new Date().toISOString()
+    })
+    .eq("id", storyId)
+    .eq("user_id", session.user.id);
 
+if (storyPublishError) {
+    console.error(
+        "Could not update story status:",
+        storyPublishError
+    );
+    alert("Chapter published, but story status could not be updated.");
+    return;
+}
         localStorage.setItem(
             "dreavelleVerseChapterStatus",
             "Published"
