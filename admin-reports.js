@@ -7,6 +7,7 @@ const adminDb = supabase.createClient(
 const message = document.getElementById("admin-message");
 const content = document.getElementById("admin-content");
 const reportsEl = document.getElementById("admin-reports");
+const authLink = document.getElementById("admin-auth-link");
 const allowedStatuses = ["pending", "reviewed", "resolved", "dismissed"];
 function setMessage(value) { message.textContent = value; }
 function field(label, value) {
@@ -56,6 +57,15 @@ async function loadReports() {
 async function init() {
   try {
     const { data: { user }, error: authError } = await adminDb.auth.getUser();
+    if (user && authLink) {
+      authLink.textContent = "Log Out";
+      authLink.href = "#";
+      authLink.addEventListener("click", async (event) => {
+        event.preventDefault();
+        await adminDb.auth.signOut();
+        window.location.href = "index.html";
+      });
+    }
     if (authError || !user) { setMessage("Please log in with your administrator account first."); return; }
     const { data: isAdmin, error } = await adminDb.rpc("is_story_report_admin");
     if (error || isAdmin !== true) { setMessage("Access denied. This account is not authorized for report moderation."); return; }
