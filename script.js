@@ -5487,7 +5487,7 @@ if (writeNavLink) {
 const writerStoryButton = document.querySelector("#writer-story-button");
 const writerStoryList = document.querySelector("#writer-story-list");
 
-if (writerStoryButton && writerStoryList) {
+if (writerStoryList) {
     (async function loadWriterStories() {
         const { data: { session }, error: authError } =
             await supabaseClient.auth.getSession();
@@ -5505,8 +5505,7 @@ if (writerStoryButton && writerStoryList) {
             writerStoryList.textContent = "Could not load your stories. Please try again.";
             return;
         }
-        writerStoryButton.textContent = "Create New Story";
-        writerStoryButton.href = "create-story.html";
+        // The separate Create New Story button remains available on Write. 
         writerStoryList.replaceChildren();
         if (!stories?.length) {
             writerStoryList.textContent = "You haven't created a story yet.";
