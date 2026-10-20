@@ -5736,7 +5736,7 @@ if (userDisplayName) {
     );
 }
 
-/* Edit Profile — save to Supabase */
+/* Edit Profile — Supabase (no legacy localStorage dependency) */
 const editProfileButton = document.querySelector("#edit-profile-button");
 const editProfileForm = document.querySelector("#edit-profile-form");
 const editDisplayName = document.querySelector("#edit-display-name");
@@ -5744,44 +5744,75 @@ const saveProfileButton = document.querySelector("#save-profile-button");
 const cancelProfileButton = document.querySelector("#cancel-profile-button");
 
 if (editProfileButton && editProfileForm && editDisplayName && saveProfileButton && cancelProfileButton) {
-    editProfileButton.addEventListener("click", function () {
-        // Show the form immediately; do not block the button on a network request.
+    function showProfileEditor() {
         editDisplayName.value = (profileDisplayName?.textContent || "").trim();
         editProfileForm.style.display = "block";
         editProfileButton.style.display = "none";
         editDisplayName.focus();
-    });
+    }
 
-    cancelProfileButton.addEventListener("click", function () {
+    function closeProfileEditor() {
         editProfileForm.style.display = "none";
         editProfileButton.style.display = "inline-block";
-    });
+    }
 
-    saveProfileButton.addEventListener("click", async function () {
+    // Set onclick on the actual button, not on a missing localStorage account.
+    editProfileButton.addEventListener("click", showProfileEditor);
+    cancelProfileButton.addEventListener("click", closeProfileEditor);
+
+    saveProfileButton.addEventListener("click", async function (event) {
+        event.preventDefault();
         const newDisplayName = editDisplayName.value.trim();
         if (!newDisplayName || newDisplayName.length > 40) {
-            alert("Enter a display name (up to 40 characters)."); return;
+            alert("Please enter a display name of up to 40 characters.");
+            return;
         }
+
         saveProfileButton.disabled = true;
+        const oldLabel = saveProfileButton.textContent;
+        saveProfileButton.textContent = "Saving...";
         try {
-            const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-            if (authError || !user) throw authError || new Error("Please log in.");
-            const { data: updated, error } = await supabaseClient.from("profiles")
-                .update({ display_name: newDisplayName }).eq("id", user.id).select("id");
-            if (error) throw error;
-            if (!updated?.length) throw new Error("Profile was not updated. Check Supabase profile permissions.");
+            const { data: { session }, error: sessionError } =
+                await supabaseClient.auth.getSession();
+            if (sessionError || !session?.user) {
+                throw sessionError || new Error("Please log in again.");
+            }
+
+            // The profile page reads its display name from this table.
+            const { data: savedRows, error: saveError } = await supabaseClient
+                .from("profiles")
+                .update({ display_name: newDisplayName })
+                .eq("id", session.user.id)
+                .select("id, display_name");
+            if (saveError) throw saveError;
+            if (!savedRows?.length) {
+                throw new Error("Your profile could not be updated. Check the profiles table permissions.");
+            }
+
+            // Keep Supabase Auth's name in sync as a secondary source.
+            const { error: metadataError } = await supabaseClient.auth.updateUser({
+                data: { display_name: newDisplayName }
+            });
+            if (metadataError) {
+                console.warn("Display name saved to profiles, but Auth metadata was not updated:", metadataError);
+            }
+
             if (profileDisplayName) profileDisplayName.textContent = newDisplayName;
             if (userDisplayName) userDisplayName.textContent = newDisplayName;
-            editProfileForm.style.display = "none";
-            editProfileButton.style.display = "inline-block";
-            if (profilePicturePlaceholder && profilePicture?.style.display === "none") {
+            if (profilePicturePlaceholder && profilePicturePlaceholder.style.display !== "none") {
                 const parts = newDisplayName.split(/\s+/);
-                profilePicturePlaceholder.textContent = (parts.length > 1 ? parts[0][0] + parts[parts.length - 1][0] : parts[0][0]).toUpperCase();
+                profilePicturePlaceholder.textContent =
+                    (parts.length > 1 ? parts[0][0] + parts[parts.length - 1][0] : parts[0][0]).toUpperCase();
             }
+            closeProfileEditor();
+            alert("Display name saved successfully.");
         } catch (error) {
             console.error("Could not save display name:", error);
-            alert("Could not save your name: " + (error?.message || "Unknown error"));
-        } finally { saveProfileButton.disabled = false; }
+            alert("Could not save your display name: " + (error?.message || "Unknown error"));
+        } finally {
+            saveProfileButton.disabled = false;
+            saveProfileButton.textContent = oldLabel;
+        }
     });
 }
 
