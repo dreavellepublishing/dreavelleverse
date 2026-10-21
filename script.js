@@ -5112,7 +5112,7 @@ if (notificationList) {
     }
 
     notificationList.replaceChildren();
-    const unreadCount = notifications.filter(
+    const unreadCount = (notifications || []).filter(
   notification => !notification.is_read
 ).length;
 
@@ -5156,7 +5156,8 @@ if (notificationCount) {
 
       const heading = document.createElement("h3");
       const isFollowerNotification = notification.title === "New Follower" && !notification.story_id;
-      heading.textContent = isFollowerNotification ? "Someone followed you" : (notification.title === "New Message" ? "Private message" : notification.title === "Writer Announcement" ? "Writer announcement" : "New Chapter Published");
+      const isMessageNotification = ["New Message", "New Private Message"].includes((notification.title || "").trim());
+      heading.textContent = isFollowerNotification ? "Someone followed you" : (isMessageNotification ? "Private message" : notification.title === "Writer Announcement" ? "Writer announcement" : "New Chapter Published");
 
       const message = document.createElement("p");
       message.textContent = notification.message;
@@ -5167,7 +5168,7 @@ if (notificationCount) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "notification-read-button";
-      button.textContent = isFollowerNotification ? "View Profile" : (notification.title === "New Message" ? "Open Messages" : notification.title === "Writer Announcement" ? "View Announcements" : "Read Chapter");
+      button.textContent = isFollowerNotification ? "View Profile" : (isMessageNotification ? "View Message" : notification.title === "Writer Announcement" ? "View Announcements" : "Read Chapter");
 
       button.addEventListener("click", async function () {
         const { error: updateError } = await supabaseClient
@@ -5181,7 +5182,7 @@ if (notificationCount) {
           return;
         }
 
-        if (notification.title === "New Message") { window.location.href = "messages.html"; return; }
+        if (isMessageNotification) { window.location.href = "messages.html"; return; }
         if (notification.title === "Writer Announcement") { window.location.href = "announcements.html"; return; }
         if (isFollowerNotification) {
           // Follower notifications currently store the display name in the message,
