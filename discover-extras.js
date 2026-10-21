@@ -93,7 +93,7 @@
       .select('title,story_id,writer_id,created_at').order('created_at',{ascending:false}).limit(100);
     for(const a of announcements||[]){
       events.push({date:dateKey(a.created_at),label:`Writer announcement: ${a.title}`,
-        url:a.story_id?storyUrl(a.story_id):`public-profile.html?id=${encodeURIComponent(a.writer_id)}`});
+        url:'announcements.html'});
     }
     drawCalendar();
   }
