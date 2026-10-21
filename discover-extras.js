@@ -88,6 +88,13 @@
         .gte('publish_at',new Date(Date.now()-86400000).toISOString()).limit(200);
       for(const ch of chapters||[]){const s=storyMap.get(ch.story_id);if(s)events.push({date:dateKey(ch.publish_at),label:`Upcoming Chapter ${ch.chapter_number}: ${s.title}`,url:storyUrl(s.id)});}
     }
+    // Public writer announcements also appear in the promotion/update calendar.
+    const {data:announcements}=await client.from('dv_writer_announcements')
+      .select('title,story_id,writer_id,created_at').order('created_at',{ascending:false}).limit(100);
+    for(const a of announcements||[]){
+      events.push({date:dateKey(a.created_at),label:`Writer announcement: ${a.title}`,
+        url:a.story_id?storyUrl(a.story_id):`public-profile.html?id=${encodeURIComponent(a.writer_id)}`});
+    }
     drawCalendar();
   }
   function drawCalendar(selectedDate='') {
@@ -106,7 +113,7 @@
     const selected=selectedDate?events.filter(e=>e.date===selectedDate):events.filter(e=>e.date>=dateKey(new Date())).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,8);
     if(!selected.length){eventsBox.textContent=selectedDate?'No updates or promotions on this date.':'No upcoming updates or promotions announced yet.';return;}
     eventsBox.append(el('h4','',selectedDate?`Events on ${selectedDate}`:'Upcoming events'));
-    for(const e of selected){const row=el('p');row.append(el('span','',`${e.date} — ${e.label} `),link('View Story',e.url));eventsBox.append(row);}
+    for(const e of selected){const row=el('p');row.append(el('span','',`${e.date} — ${e.label} `),link('View',e.url));eventsBox.append(row);}
   }
   document.getElementById('dv-calendar-prev').onclick=()=>{month.setMonth(month.getMonth()-1);drawCalendar();};
   document.getElementById('dv-calendar-next').onclick=()=>{month.setMonth(month.getMonth()+1);drawCalendar();};

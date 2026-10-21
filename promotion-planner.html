@@ -1,21 +1,12 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Promotion &amp; Update Planner | DreavelleVerse</title><link rel="stylesheet" href="style.css"></head>
-<body><header><div class="header-brand"><h1>DreavelleVerse</h1><p>Where Stories Come Alive.</p></div><nav><a href="index.html">Home</a><a href="discover.html">Discover</a><a href="write.html">Write</a><a href="notifications.html">Notifications</a><a href="profile.html">My Profile</a></nav></header>
-<main><section class="dv-planner"><h2>Promote Your Story</h2><p>Earn promotion tickets through writing streaks: 2 consecutive qualifying days earn a small ticket, and 5 earn a big ticket. Tickets expire 3 days after earning; a redeemed banner runs for 3 days. Pair promotions are separate. Both writers must approve a pair promotion before it is shown publicly. <a href="writer-progress.html">View My Writing Calendar</a>.</p>
+<body><header><div class="header-brand"><h1>DreavelleVerse</h1><p>Where Stories Come Alive.</p></div><nav><a href="index.html">Home</a><a href="discover.html">Discover</a><a href="write.html">Write</a><a href="notifications.html">Notifications</a><a href="profile.html">My Profile</a><a href="messages.html">Messages</a> <a href="announcements.html">Announcements</a> </nav></header>
+<main><section class="dv-planner"><h2>My Promotion Tickets</h2><p>Earn promotion tickets through writing streaks: 2 consecutive qualifying days earn a small ticket, and 5 earn a big ticket. Tickets expire 3 days after earning; a redeemed banner runs for 3 days. Existing pair requests still require both writers to approve. <a href="writer-progress.html">View My Writing Calendar</a>.</p>
 <p id="dv-planner-status" role="status">Checking your account…</p>
-<form id="dv-promo-form" hidden>
-<label for="dv-promo-story">Your published story</label><select id="dv-promo-story" required></select>
-<label for="dv-promo-kind">Promotion size</label><select id="dv-promo-kind"><option value="pair">Pair promotion (partner approval required)</option></select>
-<div id="dv-promo-partner-wrap" hidden><label for="dv-promo-partner">Partner's published story</label><select id="dv-promo-partner"></select></div>
-<label for="dv-promo-headline">Promotion headline</label><input id="dv-promo-headline" maxlength="100" minlength="3" required placeholder="A new chapter is coming!">
-<label for="dv-promo-description">Description</label><textarea id="dv-promo-description" maxlength="500" rows="3" placeholder="Tell readers why they should visit your story."></textarea>
-<label for="dv-promo-start">Start date</label><input id="dv-promo-start" type="date" required>
-<label for="dv-promo-end">End date (maximum 31 days)</label><input id="dv-promo-end" type="date" required>
-<button type="submit" id="dv-promo-submit">Submit promotion</button>
-</form>
-<h3>My Promotion Tickets</h3><p>Choose one of your published stories and redeem an available ticket once. Unused tickets expire after 3 days.</p><div id="dv-tickets" aria-live="polite">Loading tickets…</div><h3>Your Promotions</h3><div id="dv-my-promos">Loading…</div>
+
+<h3>Redeem Your Tickets</h3><p>Choose one of your published stories and redeem an available ticket once. Unused tickets expire after 3 days.</p><div id="dv-tickets" aria-live="polite">Loading tickets…</div><h3>Your Promotions</h3><div id="dv-my-promos">Loading…</div>
 <h3>Pair Promotion Requests to Approve</h3><div id="dv-pair-requests">Loading…</div>
 <p><a href="discover.html">See recommendations and the public update calendar</a></p>
 <p><small>Scheduled chapters appear on the calendar automatically when their story is public. Manage chapter release dates in the existing Chapter Editor.</small></p>
 </section></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="script.js"></script><script src="promotion-planner.js?v=2"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="script.js"></script><script src="promotion-planner.js?v=4"></script></body></html>

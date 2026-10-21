@@ -29,6 +29,7 @@
     const follow = document.createElement("button"); follow.type = "button"; follow.textContent = "Follow";
     const feedback = document.createElement("p"); feedback.setAttribute("role", "status");
     card.append(cover, avatar, heading, bio, count, follow, feedback);
+    const messageLink=document.createElement("a"); messageLink.href="messages.html?to="+encodeURIComponent(id); messageLink.textContent="Send Private Message"; messageLink.className="start-reading-button"; card.append(messageLink);
     const { data: { session } } = await supabaseClient.auth.getSession();
     const myId = session?.user?.id;
     if (!myId) { follow.textContent = "Log in to Follow"; follow.onclick = () => location.href = "login.html"; }
