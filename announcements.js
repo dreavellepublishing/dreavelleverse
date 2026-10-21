@@ -22,7 +22,21 @@
  async function loadFeed(){
   await loadUnread();const {data,error}=await db.from('dv_writer_announcements').select('id,writer_id,story_id,title,body,created_at').order('created_at',{ascending:false}).limit(40);
  feed.replaceChildren();if(error){feed.textContent='Announcements unavailable. Install the accompanying Supabase SQL.';return;}
- for(const a of data||[]){const item=make('article','');item.className='dv-ann-item';const h=make('h4',a.title),body=make('p',a.body),date=make('small',new Date(a.created_at).toLocaleString()),link=make('a','Writer profile');link.href='public-profile.html?id='+encodeURIComponent(a.writer_id);item.append(h,date,body,link);
+ // Resolve public display names for the writers shown in this feed.
+ const writerIds = [...new Set((data || []).map(a => a.writer_id).filter(Boolean))];
+ const writerNames = new Map();
+ if (writerIds.length) {
+  const {data:profiles, error:profileError} = await db.from('profiles')
+   .select('id,display_name').in('id',writerIds);
+  if (profileError) console.warn('Could not load announcement writer names:',profileError.message);
+  else for (const p of profiles || []) writerNames.set(p.id,(p.display_name || '').trim());
+ }
+ for(const a of data||[]){const item=make('article','');item.className='dv-ann-item';const h=make('h4',a.title),body=make('p',a.body),date=make('small',new Date(a.created_at).toLocaleString());
+  const byline=make('p','Posted by ');
+  const link=make('a',writerNames.get(a.writer_id) || 'Writer');
+  link.href='public-profile.html?id='+encodeURIComponent(a.writer_id);
+  byline.append(link);
+  item.append(h,byline,date,body);
   // Only mark an announcement read when its specific matching card is opened.
   // Existing notifications store the announcement title in the message, not an announcement ID.
   const matches = unreadAnnouncements.filter(n =>
