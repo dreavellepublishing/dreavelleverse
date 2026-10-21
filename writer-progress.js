@@ -20,7 +20,7 @@
     const totalWords = (data||[]).reduce((n,d)=>n+d.words_added,0);
     const published = (data||[]).reduce((n,d)=>n+d.chapters_published,0);
     const qualified = (data||[]).filter(d=>d.words_added>=100||d.chapters_published>0).length;
-    summary.textContent = `${totalWords.toLocaleString()} new words · ${published} chapters published · ${qualified} qualifying days this month. A day qualifies with 100+ new saved words OR a published chapter (UTC). Two consecutive days earn a small promotion; five earn a big promotion.`;
+    summary.textContent = `${totalWords.toLocaleString()} new words · ${published} chapters published · ${qualified} qualifying days this month. A day qualifies with 100+ new saved words OR a published chapter (UTC). Two consecutive days earn a small ticket; five earn a big ticket. Redeem within 3 days; banners run for 3 days.`;
     calendar.replaceChildren();
     for (const label of ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']) {
       const el=document.createElement('strong');el.textContent=label;calendar.append(el);

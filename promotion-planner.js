@@ -22,6 +22,30 @@
     status.textContent=myStories.length?'Choose your promotion and dates. All promotions are free.':'Publish a story first to create a promotion.';
     const today=dateISO(new Date());$('dv-promo-start').value=today;$('dv-promo-end').value=today;
     await loadLists();
+    await loadTickets();
+  }
+  async function loadTickets(){
+    const box=$('dv-tickets');box.replaceChildren();
+    const {data,error}=await client.from('dv_promotion_tickets').select('id,kind,earned_at,expires_at,redeemed_at').eq('writer_id',userId).order('earned_at',{ascending:false}).limit(100);
+    if(error){box.textContent='Tickets unavailable. Run the promotion tickets SQL setup.';console.error(error);return;}
+    const available=(data||[]).filter(t=>!t.redeemed_at&&new Date(t.expires_at).getTime()>Date.now());
+    if(!available.length){box.textContent='No available tickets. Write 100+ new words or publish a chapter on consecutive days to earn one.';return;}
+    for(const t of available){
+      const item=document.createElement('div');item.className='dv-planner-item';
+      const title=make('strong',`${t.kind==='large'?'Big':'Small'} Promotion Ticket`);
+      const expiry=make('p',`Expires: ${new Date(t.expires_at).toLocaleString()}`);
+      const select=document.createElement('select');select.setAttribute('aria-label','Story to promote');myStories.forEach(s=>option(select,s));
+      const button=make('button','Redeem · 3-day banner');button.type='button';button.disabled=!myStories.length;
+      button.onclick=async()=>{
+        if(!confirm('Use this ticket once to promote your selected story for 3 days?'))return;
+        button.disabled=true;
+        const {error}=await client.rpc('dv_redeem_promotion_ticket',{p_ticket_id:t.id,p_story_id:select.value});
+        if(error){status.textContent='Unable to redeem: '+error.message;button.disabled=false;return;}
+        status.textContent='Ticket redeemed! Your story banner is now active for 3 days.';
+        await loadTickets();await loadLists();
+      };
+      item.append(title,expiry,select,document.createTextNode(' '),button);box.append(item);
+    }
   }
   async function loadLists(){
     const {data:promos,error}=await client.from('dv_promotions').select('id,owner_id,story_id,partner_story_id,kind,headline,start_date,end_date,partner_approved').order('created_at',{ascending:false}).limit(200);
@@ -29,7 +53,7 @@
     if(error){mine.textContent='Promotion table is not available yet. Run the supplied SQL and enable its Data API access.';requests.textContent='';console.error(error);return;}
     const my=(promos||[]).filter(p=>p.owner_id===userId);
     for(const p of my){const item=make('div',`${p.headline} — ${p.kind} · ${p.start_date} to ${p.end_date}${p.kind==='pair'&&!p.partner_approved?' (awaiting partner approval)':''}`);item.className='dv-planner-item';
-      const del=make('button','Delete');del.type='button';del.addEventListener('click',async()=>{if(!confirm('Delete this promotion?'))return;const {error}=await client.from('dv_promotions').delete().eq('id',p.id).eq('owner_id',userId);if(error)status.textContent=error.message;else await loadLists();});item.append(document.createTextNode(' '),del);mine.append(item);}
+      if(p.kind!=='pair'){mine.append(item);continue;}const del=make('button','Delete');del.type='button';del.addEventListener('click',async()=>{if(!confirm('Delete this promotion?'))return;const {error}=await client.from('dv_promotions').delete().eq('id',p.id).eq('owner_id',userId);if(error)status.textContent=error.message;else await loadLists();});item.append(document.createTextNode(' '),del);mine.append(item);}
     if(!my.length)mine.textContent='No promotions submitted yet.';
     const partnerIds=new Set(myStories.map(s=>s.id));
     const pending=(promos||[]).filter(p=>p.kind==='pair'&&!p.partner_approved&&partnerIds.has(p.partner_story_id)&&p.owner_id!==userId);
