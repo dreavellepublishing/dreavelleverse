@@ -6794,3 +6794,64 @@ if (storyStatusButton) {
 }
 
 updateStoryStatusDisplay();
+
+/* Announcement and notification unread badges (all pages) */
+(function () {
+  const announcementTitles = new Set(["Writer Announcement"]);
+  const badgeStyle = "margin-left:6px;background:#e63946;color:#fff;border-radius:12px;padding:2px 7px;font-weight:bold;font-size:12px;";
+  function getBadge(link, id) {
+    if (!link) return null;
+    let badge = document.getElementById(id);
+    if (!badge) {
+      badge = document.createElement("span");
+      badge.id = id;
+      badge.style.cssText = badgeStyle;
+      badge.hidden = true;
+      link.appendChild(badge);
+    }
+    return badge;
+  }
+  async function refreshUnreadBadges() {
+    if (!window.supabaseClient) return;
+    const { data: { user }, error: authError } = await window.supabaseClient.auth.getUser();
+    const announcementLinks = Array.from(document.querySelectorAll('a[href^="announcements.html"]'));
+    const notificationLinks = Array.from(document.querySelectorAll('a[href^="notifications.html"]'));
+    if (authError || !user) {
+      for (const link of [...announcementLinks, ...notificationLinks]) {
+        const badge = link.querySelector('.dv-unread-badge');
+        if (badge) badge.hidden = true;
+      }
+      return;
+    }
+    const { data, error } = await window.supabaseClient.from('notifications')
+      .select('title').eq('user_id', user.id).eq('is_read', false);
+    if (error) { console.warn('Unread badge lookup:', error.message); return; }
+    const all = (data || []).length;
+    const announcements = (data || []).filter(n => announcementTitles.has((n.title || '').trim())).length;
+    function show(link, id, count) {
+      const badge = getBadge(link, id);
+      if (!badge) return;
+      badge.classList.add('dv-unread-badge');
+      badge.textContent = String(count);
+      badge.hidden = count === 0;
+      badge.setAttribute('aria-label', count + ' unread');
+    }
+    announcementLinks.forEach((link, i) => show(link, 'dv-ann-count-' + i, announcements));
+    notificationLinks.forEach((link, i) => {
+      const existing = link.querySelector('#notification-count');
+      if (existing) {
+        existing.textContent = String(all);
+        existing.hidden = all === 0;
+      } else show(link, 'dv-notification-count-' + i, all);
+    });
+  }
+  window.dvRefreshUnreadBadges = refreshUnreadBadges;
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshUnreadBadges);
+  } else refreshUnreadBadges();
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refreshUnreadBadges();
+  });
+  window.addEventListener('dv-announcement-read', refreshUnreadBadges);
+  setInterval(() => { if (!document.hidden) refreshUnreadBadges(); }, 30000);
+})();

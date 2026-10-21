@@ -8,8 +8,42 @@
  $('dv-ann-form').onsubmit=async e=>{e.preventDefault();const b=e.currentTarget.querySelector('button');b.disabled=true;
   const payload={writer_id:user.id,story_id:$('dv-ann-story').value||null,title:$('dv-ann-title').value.trim(),body:$('dv-ann-body').value.trim()};
   const {error}=await db.from('dv_writer_announcements').insert(payload);status.textContent=error?'Could not post: '+error.message:'Announcement posted! Followers have been notified.';if(!error){e.target.reset();await loadFeed();}b.disabled=false;};}
- async function loadFeed(){const {data,error}=await db.from('dv_writer_announcements').select('id,writer_id,story_id,title,body,created_at').order('created_at',{ascending:false}).limit(40);
+ let unreadAnnouncements = [];
+ async function loadUnread() {
+  unreadAnnouncements = [];
+  if (!user) return;
+  const {data,error} = await db.from('notifications')
+    .select('id,title,message,created_at').eq('user_id',user.id)
+    .eq('title','Writer Announcement').eq('is_read',false)
+    .order('created_at',{ascending:false});
+  if (error) console.warn('Cannot load unread announcements:',error.message);
+  else unreadAnnouncements = data || [];
+ }
+ async function loadFeed(){
+  await loadUnread();const {data,error}=await db.from('dv_writer_announcements').select('id,writer_id,story_id,title,body,created_at').order('created_at',{ascending:false}).limit(40);
  feed.replaceChildren();if(error){feed.textContent='Announcements unavailable. Install the accompanying Supabase SQL.';return;}
- for(const a of data||[]){const item=make('article','');item.className='dv-ann-item';const h=make('h4',a.title),body=make('p',a.body),date=make('small',new Date(a.created_at).toLocaleString()),link=make('a','Writer profile');link.href='public-profile.html?id='+encodeURIComponent(a.writer_id);item.append(h,date,body,link);if(a.story_id){const s=make('a',' · Read story');s.href='read-story.html?id='+encodeURIComponent(a.story_id);item.append(s);}feed.append(item);}if(!data?.length)feed.textContent='No announcements yet.';}
+ for(const a of data||[]){const item=make('article','');item.className='dv-ann-item';const h=make('h4',a.title),body=make('p',a.body),date=make('small',new Date(a.created_at).toLocaleString()),link=make('a','Writer profile');link.href='public-profile.html?id='+encodeURIComponent(a.writer_id);item.append(h,date,body,link);
+  // Only mark an announcement read when its specific matching card is opened.
+  // Existing notifications store the announcement title in the message, not an announcement ID.
+  const matches = unreadAnnouncements.filter(n =>
+    (n.message || '').includes(a.title) &&
+    new Date(n.created_at).getTime() >= new Date(a.created_at).getTime() - 60000
+  );
+  if (matches.length === 1) {
+   const read = make('button','Read announcement');
+   read.type='button';
+   read.style.marginLeft='12px';
+   read.onclick = async () => {
+    read.disabled=true;
+    const {error:markError}=await db.from('notifications').update({is_read:true})
+      .eq('id',matches[0].id).eq('user_id',user.id);
+    if(markError){read.disabled=false;status.textContent='Could not mark announcement as read: '+markError.message;return;}
+    read.textContent='Read ✓';
+    unreadAnnouncements=unreadAnnouncements.filter(n=>n.id!==matches[0].id);
+    window.dispatchEvent(new Event('dv-announcement-read'));
+   };
+   item.append(read);
+  }
+  if(a.story_id){const s=make('a',' · Read story');s.href='read-story.html?id='+encodeURIComponent(a.story_id);item.append(s);}feed.append(item);}if(!data?.length)feed.textContent='No announcements yet.';}
  await loadFeed();
 })().catch(console.error);
