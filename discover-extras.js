@@ -90,10 +90,10 @@
     }
     // Public writer announcements also appear in the promotion/update calendar.
     const {data:announcements}=await client.from('dv_writer_announcements')
-      .select('title,story_id,writer_id,created_at').order('created_at',{ascending:false}).limit(100);
+      .select('id,title,story_id,writer_id,created_at').order('created_at',{ascending:false}).limit(100);
     for(const a of announcements||[]){
       events.push({date:dateKey(a.created_at),label:`Writer announcement: ${a.title}`,
-        url:'announcements.html'});
+        url:`announcements.html?announcement=${encodeURIComponent(a.id)}`});
     }
     drawCalendar();
   }

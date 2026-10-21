@@ -31,7 +31,11 @@
   if (profileError) console.warn('Could not load announcement writer names:',profileError.message);
   else for (const p of profiles || []) writerNames.set(p.id,(p.display_name || '').trim());
  }
- for(const a of data||[]){const item=make('article','');item.className='dv-ann-item';const h=make('h4',a.title),body=make('p',a.body),date=make('small',new Date(a.created_at).toLocaleString());
+ const targetId = new URLSearchParams(window.location.search).get('announcement');
+  let targetItem = null;
+  for(const a of data||[]){const item=make('article','');item.className='dv-ann-item';
+   item.id='announcement-'+a.id;
+   if(targetId===String(a.id)){targetItem=item;item.style.outline='3px solid #8050b5';item.style.outlineOffset='4px';}const h=make('h4',a.title),body=make('p',a.body),date=make('small',new Date(a.created_at).toLocaleString());
   const byline=make('p','Posted by ');
   const link=make('a',writerNames.get(a.writer_id) || 'Writer');
   link.href='public-profile.html?id='+encodeURIComponent(a.writer_id);
@@ -58,6 +62,8 @@
    };
    item.append(read);
   }
-  if(a.story_id){const s=make('a',' · Read story');s.href='read-story.html?id='+encodeURIComponent(a.story_id);item.append(s);}feed.append(item);}if(!data?.length)feed.textContent='No announcements yet.';}
+  if(a.story_id){const s=make('a',' · Read story');s.href='read-story.html?id='+encodeURIComponent(a.story_id);item.append(s);}feed.append(item);}
+  if(targetItem){requestAnimationFrame(()=>targetItem.scrollIntoView({behavior:'smooth',block:'center'}));}
+  if(!data?.length)feed.textContent='No announcements yet.';}
  await loadFeed();
 })().catch(console.error);
