@@ -2941,6 +2941,72 @@ async function searchDiscoverUsers() {
         link.textContent = "View Profile";
         card.append(avatar, info, link);
         discoverUsersResults.appendChild(card);
+
+        // Display this writer's public books directly below their profile.
+        const books = document.createElement("div");
+        books.className = "discover-writer-books";
+        books.style.margin = "12px 0 24px";
+        books.textContent = "Loading published books...";
+        discoverUsersResults.appendChild(books);
+
+        const { data: writerStories, error: booksError } = await supabaseClient
+            .from("stories")
+            .select("id, title, cover_url, genre")
+            .eq("user_id", person.id)
+            .eq("status", "Published")
+            .order("title", { ascending: true });
+
+        books.replaceChildren();
+        if (booksError) {
+            console.error("Could not load writer books:", booksError);
+            books.textContent = "Books are temporarily unavailable.";
+            continue;
+        }
+        if (!writerStories?.length) continue;
+
+        const { data: publishedChapters, error: chapterError } = await supabaseClient
+            .from("chapters")
+            .select("story_id")
+            .in("story_id", writerStories.map(story => story.id))
+            .eq("status", "Published");
+        if (chapterError) {
+            console.error("Could not check published chapters:", chapterError);
+            books.textContent = "Books are temporarily unavailable.";
+            continue;
+        }
+        const publicStoryIds = new Set((publishedChapters || []).map(chapter => chapter.story_id));
+        const publicBooks = writerStories.filter(story => publicStoryIds.has(story.id));
+        if (!publicBooks.length) continue;
+
+        const booksHeading = document.createElement("h4");
+        booksHeading.textContent = `Published books by ${person.display_name || "this writer"}`;
+        books.appendChild(booksHeading);
+        for (const story of publicBooks) {
+            const book = document.createElement("article");
+            book.className = "discover-user-card";
+            book.style.marginTop = "10px";
+            if (story.cover_url && /^https:\/\//i.test(story.cover_url)) {
+                const cover = document.createElement("img");
+                cover.src = story.cover_url;
+                cover.alt = `${story.title || "Story"} cover`;
+                cover.loading = "lazy";
+                cover.style.cssText = "width:65px;height:90px;object-fit:cover;border-radius:6px";
+                book.appendChild(cover);
+            }
+            const details = document.createElement("div");
+            details.className = "discover-user-info";
+            const title = document.createElement("h4");
+            title.textContent = story.title || "Untitled Story";
+            const genre = document.createElement("p");
+            genre.textContent = story.genre || "Story";
+            details.append(title, genre);
+            const readLink = document.createElement("a");
+            readLink.className = "start-reading-button";
+            readLink.href = `read-story.html?id=${encodeURIComponent(story.id)}`;
+            readLink.textContent = "Read Book";
+            book.append(details, readLink);
+            books.appendChild(book);
+        }
     }
 }
 
