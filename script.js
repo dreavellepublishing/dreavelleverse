@@ -2433,9 +2433,8 @@ if (readerStoryDescription) {
     (async function () {
 
         const storyId =
-            localStorage.getItem(
-                "dreavelleVerseStoryId"
-            );
+  new URLSearchParams(window.location.search).get("id") ||
+  localStorage.getItem("dreavelleVerseStoryId");
 
         if (!storyId) {
             return;
