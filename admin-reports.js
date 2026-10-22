@@ -10,6 +10,7 @@ const reportsEl = document.getElementById("admin-reports");
 const allowedStatuses = ["pending", "reviewed", "resolved"];
 const filter = document.getElementById("report-filter");
 let allReports = [];
+let storyTitles = new Map();
 function setMessage(value) { message.textContent = value; }
 function field(label, value) {
   const p = document.createElement("p");
@@ -31,14 +32,34 @@ async function loadReports() {
     .select("id,story_id,reason,details,status,created_at")
     .order("created_at", { ascending: false }).limit(100);
   if (error) { setMessage("Could not load reports. Check your administrator permissions."); console.error(error); return; }
-  allReports = data;
+  allReports = data || [];
+  storyTitles = new Map();
+  const storyIds = [...new Set(allReports.map(r => r.story_id).filter(Boolean))];
+  if (storyIds.length) {
+    const { data: stories, error: storiesError } = await adminDb.from("stories")
+      .select("id,title").in("id", storyIds);
+    if (storiesError) console.error("Could not load reported story titles:", storiesError);
+    else for (const story of stories || []) storyTitles.set(story.id, story.title || "Untitled Story");
+  }
   showReports();
 }
 function renderReports(data) {
   for (const report of data) {
     const card = document.createElement("article"); card.className = "admin-card";
     const heading = document.createElement("h2"); heading.textContent = "Story report"; card.append(heading);
-    card.append(field("Report ID", report.id), field("Story ID", report.story_id),
+    card.append(field("Report ID", report.id), field("Story ID", report.story_id));
+    card.append(field("Reported story", storyTitles.get(report.story_id) || "Title unavailable"));
+    if (report.story_id) {
+      const link = document.createElement("a");
+      link.href = `read-story.html?id=${encodeURIComponent(report.story_id)}`;
+      link.textContent = "View Story";
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      const linkLine = document.createElement("p");
+      linkLine.append(link);
+      card.append(linkLine);
+    }
+    card.append(
       field("Reason", report.reason), field("Details", report.details),
       field("Submitted", report.created_at ? new Date(report.created_at).toLocaleString() : "—"),
       field("Current status", report.status));
