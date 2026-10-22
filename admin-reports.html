@@ -2,21 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Report Moderation | DreavelleVerse</title>
+<title>Report Management | DreavelleVerse</title>
 <link rel="stylesheet" href="style.css">
 <style>
 .admin-wrap{max-width:1050px;margin:35px auto;padding:20px} .admin-card{background:white;color:#19314b;border:1px solid #dce5ec;border-radius:12px;padding:20px;margin:16px 0;overflow-wrap:anywhere}
 .admin-card h2{margin-top:0} .admin-card p{margin:9px 0} .admin-card select,.admin-card button{padding:9px;margin:5px 8px 5px 0} .admin-card button{cursor:pointer} .admin-muted{color:#526779} .admin-status{font-weight:bold}
-
-.admin-wrap>h1{margin-bottom:8px}.admin-wrap>p{margin:6px 0 14px}#admin-content{margin-top:20px}#admin-content[hidden]{display:none}.admin-card{box-shadow:0 5px 20px rgba(14,62,88,.06)}.admin-card h2{color:#075d79}.admin-card label{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap}.admin-card select,.admin-card button,#admin-refresh{font:inherit;border-radius:8px;padding:11px 15px;min-height:43px}.admin-card select{background:#fff;border:1px solid #91b8c7;color:#153e50}.admin-card button,#admin-refresh{background:#006381;color:#fff;border:1px solid #006381;cursor:pointer;font-weight:600;transition:background .15s ease}.admin-card button:hover,#admin-refresh:hover{background:#004c63}.admin-card button:disabled{opacity:.6;cursor:wait}.admin-card button:focus-visible,#admin-refresh:focus-visible,.admin-card select:focus-visible{outline:3px solid #80c9de;outline-offset:2px}.admin-card [role=status]{margin-left:10px;color:#075d79}#admin-message{color:#35576b}nav a{margin-left:14px}
 </style>
 </head>
 <body>
-<header><div class="header-brand"><h1>DreavelleVerse</h1><p>Where Stories Come Alive.</p></div><nav><a href="index.html">Home</a><a href="login.html" id="admin-auth-link">Log In</a></nav></header>
-<main class="admin-wrap"><h1>Story Report Moderation</h1><p>Restricted to authorized DreavelleVerse administrators.</p>
+<header><div class="header-brand"><h1>DreavelleVerse</h1><p>Where Stories Come Alive.</p></div><nav><a href="index.html">Home</a><a href="login.html">Log In</a></nav></header>
+<main class="admin-wrap"><h1>Report Management</h1><p>Restricted to authorized DreavelleVerse administrators.</p>
 <p id="admin-message" role="status" aria-live="polite">Checking administrator access…</p>
-<section id="admin-content" hidden><button type="button" id="admin-refresh">Refresh reports</button><div id="admin-reports"></div></section>
+<section id="admin-content" hidden><label for="report-filter">Show: </label><select id="report-filter"><option value="all">All reports</option><option value="pending">Pending</option><option value="reviewed">Reviewed</option><option value="resolved">Resolved</option></select> <button type="button" id="admin-refresh">Refresh reports</button><div id="admin-reports"></div></section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="admin-reports.js"></script>
+<script src="admin-reports.js?v=20261022-1"></script>
 </body></html>

@@ -7,14 +7,22 @@ const adminDb = supabase.createClient(
 const message = document.getElementById("admin-message");
 const content = document.getElementById("admin-content");
 const reportsEl = document.getElementById("admin-reports");
-const authLink = document.getElementById("admin-auth-link");
-const allowedStatuses = ["pending", "reviewed", "resolved", "dismissed"];
+const allowedStatuses = ["pending", "reviewed", "resolved"];
+const filter = document.getElementById("report-filter");
+let allReports = [];
 function setMessage(value) { message.textContent = value; }
 function field(label, value) {
   const p = document.createElement("p");
   const strong = document.createElement("strong"); strong.textContent = label + ": ";
   p.append(strong, document.createTextNode(value == null ? "—" : String(value)));
   return p;
+}
+function showReports() {
+  reportsEl.replaceChildren();
+  const data = allReports.filter(r => filter.value === "all" || r.status === filter.value);
+  setMessage(`${data.length} report(s) shown (${allReports.length} loaded; most recent 100 maximum).`);
+  if (!data.length) { reportsEl.append(field("Reports", "No reports match this filter")); return; }
+  renderReports(data);
 }
 async function loadReports() {
   setMessage("Loading reports…");
@@ -23,8 +31,10 @@ async function loadReports() {
     .select("id,story_id,reason,details,status,created_at")
     .order("created_at", { ascending: false }).limit(100);
   if (error) { setMessage("Could not load reports. Check your administrator permissions."); console.error(error); return; }
-  setMessage(`${data.length} report(s) loaded (most recent 100 maximum).`);
-  if (!data.length) { reportsEl.append(field("Reports", "No reports found")); return; }
+  allReports = data;
+  showReports();
+}
+function renderReports(data) {
   for (const report of data) {
     const card = document.createElement("article"); card.className = "admin-card";
     const heading = document.createElement("h2"); heading.textContent = "Story report"; card.append(heading);
@@ -50,6 +60,7 @@ async function loadReports() {
       button.disabled = false;
       if (error) { console.error(error); feedback.textContent = "Update failed; check permissions."; return; }
       report.status = select.value; feedback.textContent = "Status saved.";
+      if (filter.value !== "all" && filter.value !== report.status) showReports();
     });
     card.append(label, button, feedback); reportsEl.append(card);
   }
@@ -57,21 +68,12 @@ async function loadReports() {
 async function init() {
   try {
     const { data: { user }, error: authError } = await adminDb.auth.getUser();
-    console.log("Admin navigation check:", { userFound: !!user, linkFound: !!authLink });
-    if (user && authLink) {
-      authLink.textContent = "Log Out";
-      authLink.href = "#";
-      authLink.addEventListener("click", async (event) => {
-        event.preventDefault();
-        await adminDb.auth.signOut();
-        window.location.href = "index.html";
-      });
-    }
     if (authError || !user) { setMessage("Please log in with your administrator account first."); return; }
     const { data: isAdmin, error } = await adminDb.rpc("is_story_report_admin");
     if (error || isAdmin !== true) { setMessage("Access denied. This account is not authorized for report moderation."); return; }
     content.hidden = false;
     document.getElementById("admin-refresh").addEventListener("click", loadReports);
+    filter.addEventListener("change", showReports);
     await loadReports();
   } catch (error) { console.error(error); setMessage("Could not verify administrator access."); }
 }
