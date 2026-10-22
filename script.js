@@ -2733,7 +2733,7 @@ function addLibraryButtonEvents() {
                 storyId
             );
 
-            window.location.href = "read-story.html";
+           window.location.href = `read-story.html?id=${encodeURIComponent(storyId)}`;
         });
     });
 
