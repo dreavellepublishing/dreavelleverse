@@ -61,13 +61,15 @@ async function submitStoryReport(storyId, reason) {
     return;
   }
 
-  const { error } = await supabaseClient
-    .from("story_reports")
-    .insert({
-      story_id: storyId,
-      reporter_id: user.id,
-      reason: selectedReason
-    });
+  const { data: newReport, error } = await supabaseClient
+  .from("story_reports")
+  .insert({
+    story_id: storyId,
+    reporter_id: user.id,
+    reason: selectedReason
+  })
+  .select("id")
+  .single();
 
   if (error) {
     console.error("Report submission error:", error);
