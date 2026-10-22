@@ -75,5 +75,16 @@ async function submitStoryReport(storyId, reason) {
     return;
   }
 
+  // Report submission is complete even if the email notification fails.
   alert("Your report has been submitted successfully.");
+
+  try {
+    const { error: notifyError } = await supabaseClient.functions.invoke(
+      "notify-story-report",
+      { body: { reportId: newReport.id } }
+    );
+    if (notifyError) console.error("Report notification failed:", notifyError);
+  } catch (notifyError) {
+    console.error("Report notification failed:", notifyError);
+  }
 }
