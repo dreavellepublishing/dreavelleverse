@@ -2786,9 +2786,17 @@ function renderLibraryStories(stories) {
                         By ${story.author || "Unknown Author"}
                     </p>
 
-                    <p>
-                        ${story.description || ""}
-                    </p>
+                    <div class="library-description">
+    <p class="library-description-text"></p>
+
+    <button
+        type="button"
+        class="library-description-toggle"
+        hidden
+    >
+        Read More
+    </button>
+</div>
 
                     <p class="discover-story-genre">
                         Genre: ${story.genre || ""}
@@ -2818,6 +2826,31 @@ function renderLibraryStories(stories) {
         })
         .join("");
 
+    const descriptionLimit = 150;
+
+libraryStories.querySelectorAll(".story-card").forEach((card, index) => {
+    const description = String(stories[index].description || "");
+    const descriptionText = card.querySelector(".library-description-text");
+    const toggle = card.querySelector(".library-description-toggle");
+
+    if (description.length <= descriptionLimit) {
+        descriptionText.textContent = description;
+        return;
+    }
+
+    const shortened = description.slice(0, descriptionLimit).trimEnd() + "...";
+
+    descriptionText.textContent = shortened;
+    toggle.hidden = false;
+
+    let expanded = false;
+
+    toggle.addEventListener("click", () => {
+        expanded = !expanded;
+        descriptionText.textContent = expanded ? description : shortened;
+        toggle.textContent = expanded ? "Read Less" : "Read More";
+    });
+});
     addLibraryButtonEvents();
 }
 
