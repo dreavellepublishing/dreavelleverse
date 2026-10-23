@@ -7265,7 +7265,7 @@ updateStoryStatusDisplay();
 
 async function loadLibrarySuggestions() {
     const container = document.getElementById("library-suggested-stories");
-    if (!container || !window.supabaseClient) return;
+    if (!container) return;
 
     const { data: stories, error } = await supabaseClient
         .from("stories")
