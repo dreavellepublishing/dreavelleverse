@@ -7259,3 +7259,76 @@ updateStoryStatusDisplay();
   window.addEventListener('dv-announcement-read', refreshUnreadBadges);
   setInterval(() => { if (!document.hidden) refreshUnreadBadges(); }, 30000);
 })();
+
+
+/* My Library - Daily Suggested Stories */
+
+async function loadLibrarySuggestions() {
+    const container = document.getElementById("library-suggested-stories");
+    if (!container || !window.supabaseClient) return;
+
+    const { data: stories, error } = await supabaseClient
+        .from("stories")
+        .select("id,title,author,cover_url")
+        .eq("status", "Published")
+        .order("id", { ascending: true })
+        .limit(1000);
+
+    if (error) {
+        console.error("Unable to load suggested stories:", error);
+        container.textContent = "Suggestions are temporarily unavailable.";
+        return;
+    }
+
+    if (!stories || !stories.length) {
+        container.textContent = "No suggested stories available yet.";
+        return;
+    }
+
+    // Use the UTC date so all readers see the same daily rotation.
+    const today = new Date().toISOString().slice(0, 10);
+    const dayNumber = Math.floor(
+        Date.parse(today + "T00:00:00Z") / 86400000
+    );
+
+    // Deterministic daily rotation across the fetched stories.
+    const offset = dayNumber % stories.length;
+    const selected = [];
+
+    for (let i = 0; i < Math.min(5, stories.length); i++) {
+        selected.push(stories[(offset + i) % stories.length]);
+    }
+
+    container.replaceChildren();
+
+    for (const story of selected) {
+        const card = document.createElement("article");
+        card.className = "library-suggestion-card";
+
+        const cover = document.createElement("img");
+        cover.className = "library-suggestion-cover";
+        cover.alt = `${story.title || "Story"} cover`;
+        cover.loading = "lazy";
+        if (story.cover_url) {
+            cover.src = story.cover_url;
+        } else {
+            cover.style.display = "none";
+        }
+
+        const title = document.createElement("h3");
+        title.textContent = story.title || "Untitled Story";
+
+        const author = document.createElement("p");
+        author.textContent = `By ${story.author || "Unknown Author"}`;
+
+        const read = document.createElement("a");
+        read.className = "start-reading-button";
+        read.href = `story.html?id=${encodeURIComponent(story.id)}`;
+        read.textContent = "Start Reading";
+
+        card.append(cover, title, author, read);
+        container.append(card);
+    }
+}
+
+loadLibrarySuggestions().catch(console.error);
