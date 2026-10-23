@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Discover Stories | DreavelleVerse</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20261023-discover-redesign">
 </head>
 
-<body>
+<body id="discover-page">
 
     <header>
         <div class="header-brand">
@@ -84,42 +84,40 @@
 <div id="discover-users-results" class="discover-users-results" role="status" aria-live="polite">Enter a name above to find people.</div>
 </section>
 
-        <section class="featured-section" id="discover-stories-section">
-
-    <div class="section-heading">
-        <h2>Featured Stories</h2>
-        <p>Stories waiting for you to discover.</p>
-    </div>
-
-
-    <div class="story-grid" id="discover-stories">
-
-    </div>
-
-</section>
-
-
-        <section class="featured-section" aria-labelledby="dv-weekly-title"><div class="section-heading"><h2 id="dv-weekly-title">🏆 Weekly Spotlight — Top 5</h2><p>Automatically updated every Monday from the previous week's writing and reader activity.</p></div><h3>Writers of the Week</h3><div id="dv-weekly-writers" class="dv-suggestion-grid">Loading weekly writers…</div><h3>Stories of the Week</h3><div id="dv-weekly-stories" class="dv-suggestion-grid">Loading weekly stories…</div></section>
-        <section class="featured-section dv-recommendations" aria-labelledby="dv-recommend-title">
-          <div class="section-heading"><h2 id="dv-recommend-title">Recommended for You</h2><p>Meet readers and writers, and discover stories worth reading.</p></div>
-          <h3>Suggested Readers &amp; Writers</h3><div id="dv-suggest-people" class="dv-suggestion-grid" aria-live="polite">Loading suggestions…</div>
-          <h3>Suggested Stories</h3><div id="dv-suggest-stories" class="dv-suggestion-grid" aria-live="polite">Loading suggestions…</div>
+        <!-- Redeemed-ticket promotions: only active records from dv_promotions -->
+        <section class="featured-section dv-discover-block" aria-labelledby="dv-small-title">
+          <div class="section-heading"><h2 id="dv-small-title">✨ Small Spotlight Promotions</h2><p>Stories promoted through redeemed tickets.</p></div>
+          <div class="dv-carousel-shell"><button type="button" class="dv-carousel-arrow" id="dv-small-prev" aria-label="Previous small promotions">‹</button><div id="dv-small-promos" class="dv-promotion-grid dv-small-list" aria-live="polite">Loading promotions…</div><button type="button" class="dv-carousel-arrow" id="dv-small-next" aria-label="Next small promotions">›</button></div>
+          <p class="dv-page-status" id="dv-small-page" aria-live="polite"></p>
         </section>
-        <section class="featured-section dv-promotions" aria-labelledby="dv-promo-title">
-          <div class="section-heading"><h2 id="dv-promo-title">Story &amp; Author Spotlight</h2><p>Small spotlights, featured promotions and writer-approved collaborations.</p></div>
-          <div id="dv-big-promos" class="dv-promotion-grid dv-big-promos" aria-live="polite"></div>
-          <div id="dv-small-promos" class="dv-promotion-grid" aria-live="polite"></div>
-          <p><a class="start-reading-button" href="promotion-planner.html">Promote your story or plan an update</a></p>
+        <section class="featured-section dv-discover-block" aria-labelledby="dv-big-title">
+          <div class="section-heading"><h2 id="dv-big-title">🌟 Big Banner Promotions</h2><p>Premium spotlight space for eligible redeemed promotions.</p></div>
+          <div class="dv-carousel-shell"><button type="button" class="dv-carousel-arrow" id="dv-big-prev" aria-label="Previous banners">‹</button><div id="dv-big-promos" class="dv-promotion-grid dv-big-promos" aria-live="polite">Loading banners…</div><button type="button" class="dv-carousel-arrow" id="dv-big-next" aria-label="Next banners">›</button></div>
+          <p class="dv-page-status" id="dv-big-page" aria-live="polite"></p>
+          <p><a href="promotion-planner.html" class="start-reading-button">Promote Your Story</a></p>
         </section>
-        <section class="featured-section dv-calendar-section" aria-labelledby="dv-calendar-title">
-          <div class="section-heading"><h2 id="dv-calendar-title">Writer Update &amp; Promotion Calendar</h2><p>Upcoming chapter releases and story promotions.</p></div>
-          <div class="dv-calendar-toolbar"><button type="button" id="dv-calendar-prev" aria-label="Previous month">‹</button><h3 id="dv-calendar-month"></h3><button type="button" id="dv-calendar-next" aria-label="Next month">›</button></div>
-          <div id="dv-calendar" class="dv-calendar" aria-label="Writer update calendar"></div><div id="dv-calendar-events" class="dv-calendar-events" aria-live="polite"></div>
+        <section class="featured-section dv-discover-block" aria-labelledby="dv-weekly-title">
+          <div class="section-heading"><h2 id="dv-weekly-title">🏆 Weekly Spotlight — Top 5</h2><p>Previous week's results, refreshed automatically each Monday by the existing ranking system.</p></div>
+          <h3>Writers of the Week</h3><div id="dv-weekly-writers" class="dv-weekly-podium" aria-live="polite">Loading weekly writers…</div>
+          <h3>Stories of the Week</h3><div id="dv-weekly-stories" class="dv-weekly-podium" aria-live="polite">Loading weekly stories…</div>
+        </section>
+        <section class="featured-section dv-discover-block" id="discover-stories-section">
+          <div class="section-heading"><h2>Featured Stories</h2><p>Ten stories to discover, rotating daily.</p></div>
+          <div class="story-grid dv-featured-grid" id="discover-stories"></div>
+        </section>
+        <section class="featured-section dv-discover-block dv-recommendations" aria-labelledby="dv-recommend-title">
+          <div class="section-heading"><h2 id="dv-recommend-title">Recommended for You</h2><p>Find readers and writers to connect with.</p></div>
+          <div id="dv-suggest-people" class="dv-suggestion-grid dv-people-grid" aria-live="polite">Loading suggestions…</div>
+        </section>
+        <section class="featured-section dv-discover-block dv-recommendations" aria-labelledby="dv-suggest-title">
+          <div class="section-heading"><h2 id="dv-suggest-title">Suggested Stories</h2><p>Five more stories worth reading.</p></div>
+          <div id="dv-suggest-stories" class="dv-suggestion-grid dv-stories-grid" aria-live="polite">Loading suggestions…</div>
         </section>
     </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="script.js"></script>
-<script src="discover-extras.js?v=20261021-direct-announcement"></script><script src="weekly-spotlight.js?v=1"></script>
+<script src="script.js?v=20261023-discover-redesign"></script>
+<script src="discover-extras.js?v=20261023-redesign"></script>
+<script src="weekly-spotlight.js?v=20261023-redesign"></script>
 </body>
 
 </html>

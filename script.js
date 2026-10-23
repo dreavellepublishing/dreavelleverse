@@ -2403,72 +2403,49 @@ if (nextButton) {
 }
 }
 
-/* Discover all public stories that have at least one published chapter. */
+/* Discover: ten published stories, rotated daily, with compact cards. */
 const discoverStories = document.querySelector("#discover-stories");
 if (discoverStories) {
     (async function loadDiscoverStories() {
-        const { data: stories, error } = await supabaseClient
-            .from("stories")
-            .select("id, title, author, description, genre, tags, cover_url")
-            .eq("status", "Published");
-        if (error) {
-            console.error("Could not load published stories:", error);
-            discoverStories.textContent = "Unable to load stories right now.";
-            return;
-        }
+        const { data: stories, error } = await supabaseClient.from("stories")
+            .select("id,title,author,genre,tags,cover_url")
+            .eq("status", "Published").order("id", { ascending: true }).limit(1000);
+        if (error) { console.error(error); discoverStories.textContent = "Unable to load stories right now."; return; }
         const preferences = JSON.parse(localStorage.getItem("dreavelleVerseReadingPreferences") || "[]");
-        discoverStories.replaceChildren();
-        let visibleCount = 0;
-        for (const story of stories || []) {
-            if (preferences.length && !preferences.includes(story.genre || "")) continue;
-            const { data: chapters, error: chapterError } = await supabaseClient
-                .from("chapters")
-                .select("id")
-                .eq("story_id", story.id)
-                .eq("status", "Published")
-                .limit(1);
-            if (chapterError || !chapters?.length) continue;
-            const card = document.createElement("div");
-            card.className = "story-card";
-            if (story.cover_url) {
-                const cover = document.createElement("img");
-                cover.className = "story-cover-image";
-                cover.alt = `${story.title || "Story"} cover`;
-                // Accept only expected remote image URLs.
-                try {
-                    const url = new URL(story.cover_url);
-                    if (["https:", "http:"].includes(url.protocol)) {
-                        cover.src = url.href;
-                        card.appendChild(cover);
-                    }
-                } catch (_) { /* Ignore malformed cover URLs. */ }
-            } else {
-                const placeholder = document.createElement("div");
-                placeholder.className = "story-cover-placeholder";
-                placeholder.textContent = "Story Cover";
-                card.appendChild(placeholder);
-            }
-            function addText(tag, value, className) {
-                const element = document.createElement(tag);
-                if (className) element.className = className;
-                element.textContent = value;
-                card.appendChild(element);
-            }
-            addText("h3", story.title || "Untitled Story");
-            addText("p", `By ${story.author || "Unknown Author"}`, "discover-story-author");
-            addText("p", story.description || "");
-            addText("p", `Genre: ${story.genre || ""}`, "discover-story-genre");
-            addText("p", `Tags: ${story.tags || ""}`, "discover-story-tags");
-            const readLink = document.createElement("a");
-            readLink.href = `read-story.html?id=${encodeURIComponent(story.id)}`;
-            readLink.className = "start-reading-button";
-            readLink.textContent = "Start Reading";
-            card.appendChild(readLink);
-            discoverStories.appendChild(card);
-            visibleCount++;
+        const pool = (stories || []).filter(story => !preferences.length || preferences.includes(story.genre || ""));
+        const eligible = [];
+        // Preserve the existing rule: only stories with a published chapter appear.
+        for (let i = 0; i < pool.length; i += 80) {
+            const batch = pool.slice(i, i + 80);
+            const { data: chapters, error: chapterError } = await supabaseClient.from("chapters")
+                .select("story_id").in("story_id", batch.map(s => s.id)).eq("status", "Published");
+            if (chapterError) { console.error(chapterError); discoverStories.textContent = "Unable to load stories right now."; return; }
+            const published = new Set((chapters || []).map(c => String(c.story_id)));
+            eligible.push(...batch.filter(s => published.has(String(s.id))));
         }
-        if (!visibleCount) discoverStories.textContent = "No published stories yet.";
-    })();
+        discoverStories.replaceChildren();
+        if (!eligible.length) { discoverStories.textContent = "No published stories yet."; return; }
+        const day = Math.floor(Date.now() / 86400000);
+        const offset = day % eligible.length;
+        const selected = Array.from({ length: Math.min(10, eligible.length) }, (_, i) => eligible[(offset + i) % eligible.length]);
+        for (const story of selected) {
+            const card = document.createElement("article"); card.className = "story-card";
+            if (story.cover_url && /^https?:\/\//i.test(story.cover_url)) {
+                const cover = document.createElement("img"); cover.className = "story-cover-image";
+                cover.src = story.cover_url; cover.alt = `${story.title || "Story"} cover`; cover.loading = "lazy"; card.append(cover);
+            } else {
+                const cover = document.createElement("div"); cover.className = "story-cover-placeholder"; cover.textContent = "Story Cover"; card.append(cover);
+            }
+            const add = (tag, value, cls) => { const node = document.createElement(tag); node.textContent = value; if (cls) node.className = cls; card.append(node); };
+            add("h3", story.title || "Untitled Story");
+            add("p", `By ${story.author || "Unknown Author"}`, "discover-story-author");
+            add("p", `Genre: ${story.genre || "—"}`, "discover-story-genre");
+            add("p", `Tags: ${Array.isArray(story.tags) ? story.tags.join(", ") : (story.tags || "—")}`, "discover-story-tags");
+            const read = document.createElement("a"); read.className = "start-reading-button";
+            read.href = `read-story.html?id=${encodeURIComponent(story.id)}`; read.textContent = "Start Reading"; card.append(read);
+            discoverStories.append(card);
+        }
+    })().catch(error => { console.error(error); discoverStories.textContent = "Unable to load stories right now."; });
 }
     /* Display Story Information on Reader Story Page */
 
