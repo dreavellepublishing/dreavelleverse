@@ -8,6 +8,9 @@
   const heading = document.getElementById('dv-writing-month');
   const storySelect = document.getElementById('dv-writing-story-select');
   const storyNote = document.getElementById('dv-writing-story-note');
+  const statWords = document.getElementById('dv-stat-words');
+const statChapters = document.getElementById('dv-stat-chapters');
+const statDays = document.getElementById('dv-stat-days');
 
   let month = new Date();
   month.setDate(1);
@@ -132,6 +135,18 @@
       day => day.words_added >= 100 ||
              day.chapters_published > 0
     ).length;
+    // Update the writing statistics cards.
+if (statWords) {
+  statWords.textContent = totalWords.toLocaleString();
+}
+
+if (statChapters) {
+  statChapters.textContent = published.toLocaleString();
+}
+
+if (statDays) {
+  statDays.textContent = qualified.toLocaleString();
+}
 
     summary.textContent =
       `${selectedStory.title}: ` +
