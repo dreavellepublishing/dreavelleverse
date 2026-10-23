@@ -5811,7 +5811,7 @@ if (writerStoryList) {
         }
         const { data: stories, error } = await supabaseClient
             .from("stories")
-            .select("id, title, status")
+            .select("*")
             .eq("user_id", session.user.id)
             .order("updated_at", { ascending: false });
         if (error) {
