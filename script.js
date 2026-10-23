@@ -7121,30 +7121,73 @@ function updateStoryStatusDisplay() {
     }
 }
 
+
 if (storyStatusButton) {
+    storyStatusButton.addEventListener("click", async function () {
+        const storyId = localStorage.getItem("dreavelleVerseStoryId");
 
-    storyStatusButton.addEventListener(
-        "click",
-        function () {
+        if (!storyId) {
+            alert("Please select a story first.");
+            return;
+        }
 
-            const currentStatus =
-                localStorage.getItem(
-                    "dreavelleVerseStoryStatus"
-                ) || "Ongoing";
+        storyStatusButton.disabled = true;
+
+        try {
+            const { data: { session }, error: authError } =
+                await supabaseClient.auth.getSession();
+
+            if (authError || !session?.user) {
+                throw new Error("Please log in again.");
+            }
+
+            const { data: currentStory, error: loadError } =
+                await supabaseClient
+                    .from("stories")
+                    .select("completion_status")
+                    .eq("id", storyId)
+                    .eq("user_id", session.user.id)
+                    .single();
+
+            if (loadError) throw loadError;
 
             const newStatus =
-                currentStatus === "Completed"
+                currentStory.completion_status === "Completed"
                     ? "Ongoing"
                     : "Completed";
 
+            const { data: updatedStory, error: saveError } =
+                await supabaseClient
+                    .from("stories")
+                    .update({ completion_status: newStatus })
+                    .eq("id", storyId)
+                    .eq("user_id", session.user.id)
+                    .select("completion_status")
+                    .single();
+
+            if (saveError) throw saveError;
+
             localStorage.setItem(
                 "dreavelleVerseStoryStatus",
-                newStatus
+                updatedStory.completion_status
             );
 
             updateStoryStatusDisplay();
+
+            const completionSelect =
+                document.getElementById("manager-completion-status");
+
+            if (completionSelect) {
+                completionSelect.value = updatedStory.completion_status;
+            }
+
+        } catch (error) {
+            console.error("Could not update story status:", error);
+            alert("Could not save story status. Please try again.");
+        } finally {
+            storyStatusButton.disabled = false;
         }
-    );
+    });
 }
 
 updateStoryStatusDisplay();
