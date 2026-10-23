@@ -5887,6 +5887,22 @@ if (fullDescription.length > previewLength) {
 } else {
     description.textContent = fullDescription;
 }
+            const likes = document.createElement("span");
+likes.className = "writer-story-likes";
+likes.textContent = "♡ — Likes";
+
+const { count: likesCount, error: likesError } =
+    await supabaseClient
+        .from("story_likes")
+        .select("id", { count: "exact", head: true })
+        .eq("story_id", story.id);
+
+if (likesError) {
+    console.error("Could not load story likes:", likesError);
+} else {
+    likes.textContent =
+        `♡ ${Number(likesCount || 0).toLocaleString()} Likes`;
+}
             const reads = document.createElement("span");
 reads.className = "writer-story-reads";
 reads.textContent = `👁 ${Number(story.total_reads || 0).toLocaleString()} Reads`;
@@ -5904,7 +5920,7 @@ reads.textContent = `👁 ${Number(story.total_reads || 0).toLocaleString()} Rea
                 localStorage.setItem("dreavelleVerseCurrentChapter", "1");
                 window.location.href = "story-manager.html";
             });
-         item.append(title, status, reads, description, manage);
+         item.append(title, status, reads, likes, description, manage);
             writerStoryList.appendChild(item);
         }
     })();
