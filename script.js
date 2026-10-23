@@ -7284,6 +7284,41 @@ async function loadLibrarySuggestions() {
         container.textContent = "No suggested stories available yet.";
         return;
     }
+    // Exclude stories already saved in the reader's library.
+let availableStories = stories;
+
+const { data: { session }, error: sessionError } =
+    await supabaseClient.auth.getSession();
+
+if (sessionError) {
+    console.warn("Unable to check library session:", sessionError);
+}
+
+if (session?.user) {
+    const { data: savedStories, error: savedError } =
+        await supabaseClient
+            .from("library")
+            .select("story_id")
+            .eq("user_id", session.user.id);
+
+    if (savedError) {
+        console.warn("Unable to check saved stories:", savedError);
+    } else {
+        const savedIds = new Set(
+            (savedStories || []).map(row => String(row.story_id))
+        );
+
+        availableStories = stories.filter(
+            story => !savedIds.has(String(story.id))
+        );
+    }
+}
+
+if (availableStories.length === 0) {
+    container.textContent =
+        "You've already saved all available stories. Explore again soon!";
+    return;
+}
 
     // Use the UTC date so all readers see the same daily rotation.
     const today = new Date().toISOString().slice(0, 10);
@@ -7292,12 +7327,14 @@ async function loadLibrarySuggestions() {
     );
 
     // Deterministic daily rotation across the fetched stories.
-    const offset = dayNumber % stories.length;
-    const selected = [];
+    const offset = dayNumber % availableStories.length;
+const selected = [];
 
-    for (let i = 0; i < Math.min(5, stories.length); i++) {
-        selected.push(stories[(offset + i) % stories.length]);
-    }
+for (let i = 0; i < Math.min(5, availableStories.length); i++) {
+    selected.push(
+        availableStories[(offset + i) % availableStories.length]
+    );
+}
 
     container.replaceChildren();
 
