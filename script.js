@@ -5927,15 +5927,27 @@ completionStatus.textContent =
                 localStorage.setItem("dreavelleVerseCurrentChapter", "1");
                 window.location.href = "story-manager.html";
             });
-         item.append(
-    title,
+         const storyDetails = document.createElement("div");
+storyDetails.className = "writer-story-details";
+
+const storyStats = document.createElement("div");
+storyStats.className = "writer-story-stats";
+
+storyStats.append(
     status,
     completionStatus,
     reads,
-    likes,
+    likes
+);
+
+storyDetails.append(
+    title,
+    storyStats,
     description,
     manage
 );
+
+item.appendChild(storyDetails);
             writerStoryList.appendChild(item);
         }
     })();
