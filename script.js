@@ -7087,6 +7087,41 @@ const storyStatusBadge =
 const storyStatusButton =
     document.querySelector("#story-status-button");
 
+async function loadStoryStatusFromSupabase() {
+    const storyId = localStorage.getItem("dreavelleVerseStoryId");
+
+    if (!storyId || !document.querySelector("#story-status-badge")) {
+        return;
+    }
+
+    try {
+        const { data: { session }, error: authError } =
+            await supabaseClient.auth.getSession();
+
+        if (authError || !session?.user) {
+            return;
+        }
+
+        const { data: story, error } = await supabaseClient
+            .from("stories")
+            .select("completion_status")
+            .eq("id", storyId)
+            .eq("user_id", session.user.id)
+            .single();
+
+        if (error) throw error;
+
+        localStorage.setItem(
+            "dreavelleVerseStoryStatus",
+            story.completion_status || "Ongoing"
+        );
+
+        updateStoryStatusDisplay();
+
+    } catch (error) {
+        console.error("Could not load story status:", error);
+    }
+}
 function updateStoryStatusDisplay() {
 
     if (!storyStatusBadge || !storyStatusButton) {
@@ -7173,6 +7208,7 @@ if (storyStatusButton) {
             );
 
             updateStoryStatusDisplay();
+            loadStoryStatusFromSupabase();
 
             const completionSelect =
                 document.getElementById("manager-completion-status");
