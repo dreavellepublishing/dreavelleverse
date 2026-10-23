@@ -74,11 +74,20 @@ if (promotionStorySelect) {
         'Publish a story to start tracking its promotion progress.';
     }
   } else {
-    for (const story of myStories) {
-      option(promotionStorySelect, story);
-    }
+  for (const story of myStories) {
+    option(promotionStorySelect, story);
+  }
 
-    const showSelectedStory = () => {
+  // Restore the previously selected story.
+  const savedStoryId = localStorage.getItem(
+    'dvPromotionSelectedStoryId'
+  );
+
+  if (myStories.some(story => story.id === savedStoryId)) {
+    promotionStorySelect.value = savedStoryId;
+  }
+
+  const showSelectedStory = () => {
       const selectedStory = myStories.find(
         story => story.id === promotionStorySelect.value
       );
@@ -90,10 +99,14 @@ if (promotionStorySelect) {
       }
     };
 
-    promotionStorySelect.addEventListener(
-      'change',
-      showSelectedStory
-    );
+promotionStorySelect.addEventListener('change', () => {
+  localStorage.setItem(
+    'dvPromotionSelectedStoryId',
+    promotionStorySelect.value
+  );
+
+  showSelectedStory();
+});
 
     showSelectedStory();
   }
