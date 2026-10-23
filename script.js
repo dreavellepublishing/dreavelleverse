@@ -5852,6 +5852,41 @@ if (coverUrl) {
 item.appendChild(cover);
             const title = document.createElement("strong");
             title.textContent = story.title || "Untitled Story";
+            const description = document.createElement("p");
+description.className = "writer-story-description";
+
+const fullDescription = story.description || "";
+const previewLength = 180;
+
+if (fullDescription.length > previewLength) {
+    const previewText = document.createElement("span");
+    const readMore = document.createElement("button");
+
+    readMore.type = "button";
+    readMore.className = "manager-read-more";
+
+    let expanded = false;
+
+    function updateDescription() {
+        previewText.textContent = expanded
+            ? fullDescription
+            : fullDescription.slice(0, previewLength).trimEnd() + "... ";
+
+        readMore.textContent = expanded
+            ? "Show Less"
+            : "Read More";
+    }
+
+    readMore.addEventListener("click", () => {
+        expanded = !expanded;
+        updateDescription();
+    });
+
+    updateDescription();
+    description.append(previewText, readMore);
+} else {
+    description.textContent = fullDescription;
+}
             const status = document.createElement("span");
             status.textContent = ` (${story.status || "Draft"}) `;
             const manage = document.createElement("button");
@@ -5866,7 +5901,7 @@ item.appendChild(cover);
                 localStorage.setItem("dreavelleVerseCurrentChapter", "1");
                 window.location.href = "story-manager.html";
             });
-            item.append(title, status, manage);
+           item.append(title, status, description, manage);
             writerStoryList.appendChild(item);
         }
     })();
