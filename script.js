@@ -3239,6 +3239,27 @@ async function loadStoryDashboardStatistics() {
     publishedChapterCount.textContent = publishedCount;
     draftChapterCount.textContent = draftCount;
     scheduledChapterCount.textContent = scheduledCount;
+    
+/* Load Story Reads from Supabase */
+
+const storyReadCount = document.getElementById("story-read-count");
+
+if (storyReadCount) {
+    const { data: storyReadsData, error: storyReadsError } =
+        await supabaseClient
+            .from("stories")
+            .select("total_reads")
+            .eq("id", storyId)
+            .eq("user_id", session.user.id)
+            .single();
+
+    if (storyReadsError) {
+        console.error("Could not load story reads:", storyReadsError);
+    } else {
+        storyReadCount.textContent = storyReadsData?.total_reads ?? 0;
+    }
+}
+
 }
 
 loadStoryDashboardStatistics();
