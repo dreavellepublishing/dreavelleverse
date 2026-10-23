@@ -856,8 +856,8 @@ if (!storyId) {
             await supabaseClient
                 .from("stories")
                 .select(
-                    "title, author, description, genre, tags, cover_url"
-                )
+    "title, author, description, genre, tags, cover_url, completion_status"
+)
                 .eq("id", storyId)
                 .eq("user_id", session.user.id)
                 .single();
@@ -869,6 +869,68 @@ if (!storyId) {
             );
             return;
         }
+        
+/* Story completion status - load and save */
+
+const completionSelect =
+    document.getElementById("manager-completion-status");
+
+const saveCompletionButton =
+    document.getElementById("save-completion-status");
+
+const completionMessage =
+    document.getElementById("completion-status-message");
+
+if (completionSelect && saveCompletionButton && story) {
+
+    completionSelect.value =
+        story.completion_status || "Ongoing";
+
+    saveCompletionButton.addEventListener("click", async () => {
+
+        const selectedStatus = completionSelect.value;
+
+        saveCompletionButton.disabled = true;
+        completionMessage.textContent = "Saving...";
+
+        try {
+            const { error: saveError } = await supabaseClient
+                .from("stories")
+                .update({
+                    completion_status: selectedStatus
+                })
+                .eq("id", storyId)
+                .eq("user_id", session.user.id)
+                .select("id")
+                .single();
+
+            if (saveError) {
+                throw saveError;
+            }
+
+            completionMessage.textContent =
+                "✓ Story status saved successfully!";
+
+        } catch (error) {
+
+            console.error(
+                "Could not save completion status:",
+                error
+            );
+
+            completionMessage.textContent =
+                "Could not save status. Please try again.";
+
+        } finally {
+
+            saveCompletionButton.disabled = false;
+
+        }
+
+    });
+
+}
+
 
         // Load likes and follows for this specific story
         const storyLikeCount =
