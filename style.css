@@ -3399,3 +3399,101 @@ header h1 a:active {
     object-fit: cover;
     border-radius: 12px;
 }
+
+
+/* =====================================
+   MY LIBRARY - DAILY SUGGESTED STORIES
+===================================== */
+
+#library-page .library-suggestions-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 18px;
+    align-items: stretch;
+    margin-top: 25px;
+    margin-bottom: 40px;
+}
+
+/* Individual suggested story card */
+
+#library-page .library-suggestion-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 12px;
+    background: #ffffff;
+    border: 1px solid #eee5f6;
+    border-radius: 14px;
+    box-shadow: 0 5px 16px rgba(70, 40, 100, 0.08);
+    overflow: hidden;
+}
+
+/* Book cover */
+
+#library-page .library-suggestion-cover {
+    display: block;
+    width: 100%;
+    height: 240px;
+    max-width: 100%;
+    object-fit: cover;
+    border-radius: 9px;
+    margin-bottom: 12px;
+}
+
+/* Story title */
+
+#library-page .library-suggestion-card h3 {
+    font-size: 15px;
+    line-height: 1.4;
+    color: #6940a0;
+    margin: 0 0 6px;
+    overflow-wrap: anywhere;
+}
+
+/* Author */
+
+#library-page .library-suggestion-card p {
+    font-size: 13px;
+    color: #667085;
+    margin: 0 0 14px;
+    overflow-wrap: anywhere;
+}
+
+/* Start Reading button */
+
+#library-page .library-suggestion-card .start-reading-button {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: auto;
+    padding: 10px 8px;
+    border-radius: 8px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+/* Tablet */
+
+@media (max-width: 1000px) {
+    #library-page .library-suggestions-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+    #library-page .library-suggestions-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    #library-page .library-suggestion-cover {
+        height: 190px;
+    }
+
+    #library-page .library-suggestion-card {
+        padding: 9px;
+    }
+}
