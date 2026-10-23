@@ -3193,3 +3193,37 @@ header h1 a:active {
         width: 100%;
     }
 }
+
+
+/* DreavelleVerse - Story Description Preview */
+
+#story-manager-page .manager-story-description {
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+    margin: 10px 0 14px;
+}
+
+#story-manager-page .manager-read-more {
+    display: inline;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-left: 4px;
+    color: #7950a3;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+#story-manager-page .manager-read-more:hover {
+    color: #56317d;
+    text-decoration: underline;
+}
+
+#story-manager-page .manager-story-details {
+    min-width: 0;
+}
+
+#story-manager-page .story-manager-heading {
+    align-items: start;
+}
