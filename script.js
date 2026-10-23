@@ -5797,7 +5797,9 @@ if (writeNavLink) {
 
 /* Writer dashboard: list the signed-in writer's stories from Supabase. */
 const writerStoryButton = document.querySelector("#writer-story-button");
-const writerStoryList = document.querySelector("#writer-story-list");
+const writerStoryList =
+    document.querySelector("#my-stories-list") ||
+    document.querySelector("#writer-story-list");
 
 if (writerStoryList) {
     (async function loadWriterStories() {
