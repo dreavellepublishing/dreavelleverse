@@ -2135,6 +2135,18 @@ if (chapterContent) {
 
             chapterContent.textContent =
                 chapter.content || "";
+            
+if (story && chapter && chapter.content) {
+    const { error: readError } =
+        await supabaseClient.rpc("dv_record_story_read", {
+            p_story_id: storyId
+        });
+
+    if (readError) {
+        console.error("Unable to record story read:", readError);
+    }
+}
+
         } else {
             if (readingChapterTitle) {
                 readingChapterTitle.textContent =
