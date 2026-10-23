@@ -3227,3 +3227,124 @@ header h1 a:active {
 #story-manager-page .story-manager-heading {
     align-items: start;
 }
+
+
+/* DreavelleVerse - Enhanced Writer Story Cards */
+
+.my-stories-grid,
+#writer-story-list,
+#my-stories-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.writer-story-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 22px;
+    padding: 24px;
+    background: #ffffff;
+    border: 1px solid #e8e0f0;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(65, 38, 90, 0.06);
+}
+
+.writer-story-cover {
+    width: 130px;
+    height: 190px;
+    object-fit: cover;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.writer-story-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.writer-story-details > strong {
+    font-size: 21px;
+    font-weight: 700;
+    color: #382449;
+}
+
+.writer-story-stats {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.writer-story-stats > span {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 11px;
+    border-radius: 20px;
+    background: #f3edf8;
+    color: #654879;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.writer-story-description {
+    margin: 0;
+    color: #665b70;
+    font-size: 14px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+.writer-story-description .manager-read-more {
+    background: none;
+    border: none;
+    color: #8150a0;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0 4px;
+}
+
+.writer-story-details > button {
+    background: #76508f;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 20px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.writer-story-details > button:hover {
+    background: #5c3975;
+}
+
+/* Mobile layout */
+
+@media (max-width: 600px) {
+    .writer-story-item {
+        gap: 14px;
+        padding: 15px;
+    }
+
+    .writer-story-cover {
+        width: 90px;
+        height: 135px;
+    }
+
+    .writer-story-details > strong {
+        font-size: 17px;
+    }
+
+    .writer-story-stats {
+        gap: 6px;
+    }
+
+    .writer-story-stats > span {
+        font-size: 11px;
+        padding: 5px 8px;
+    }
+}
