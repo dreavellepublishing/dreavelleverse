@@ -870,6 +870,53 @@ if (!storyId) {
             return;
         }
 
+        // Load likes and follows for this specific story
+        const storyLikeCount =
+            document.getElementById("story-like-count");
+
+        const storyFollowCount =
+            document.getElementById("story-follow-count");
+
+        if (storyLikeCount) {
+            storyLikeCount.textContent = "…";
+        }
+
+        if (storyFollowCount) {
+            storyFollowCount.textContent = "…";
+        }
+
+        const [likesResult, followsResult] = await Promise.all([
+            supabaseClient
+                .from("story_likes")
+                .select("*", { count: "exact", head: true })
+                .eq("story_id", storyId),
+
+            supabaseClient
+                .from("story_follows")
+                .select("*", { count: "exact", head: true })
+                .eq("story_id", storyId)
+        ]);
+
+        if (storyLikeCount) {
+            storyLikeCount.textContent = likesResult.error
+                ? "—"
+                : String(likesResult.count ?? 0);
+        }
+
+        if (storyFollowCount) {
+            storyFollowCount.textContent = followsResult.error
+                ? "—"
+                : String(followsResult.count ?? 0);
+        }
+
+        if (likesResult.error) {
+            console.error("Unable to load story likes:", likesResult.error);
+        }
+
+        if (followsResult.error) {
+            console.error("Unable to load story follows:", followsResult.error);
+        }
+
         managerStoryTitle.textContent =
             story.title || "Untitled Story";
 
