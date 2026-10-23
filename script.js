@@ -7360,7 +7360,7 @@ for (let i = 0; i < Math.min(5, availableStories.length); i++) {
 
         const read = document.createElement("a");
         read.className = "start-reading-button";
-        read.href = `story.html?id=${encodeURIComponent(story.id)}`;
+        read.href = `read-story.html?id=${encodeURIComponent(story.id)}`;
         read.textContent = "Start Reading";
 
         card.append(cover, title, author, read);
