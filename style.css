@@ -2944,10 +2944,22 @@ header h1 a:active {
 /* Story Manager - Book Cover and Story Information */
 
 #story-manager-page .story-manager-heading {
-    display: grid;
-    grid-template-columns: 180px minmax(0, 1fr);
-    gap: 28px;
-    align-items: start;
+    display: block;
+    width: 100%;
+}
+
+#story-manager-page .manager-story-details {
+    min-width: 0;
+}
+
+#story-manager-page .manager-cover-container {
+    float: left;
+    width: 180px;
+    margin: 0 28px 20px 0;
+}
+
+#story-manager-page .manager-story-details {
+    display: flow-root;
 }
 
 #story-manager-page .manager-cover-container {
@@ -2964,31 +2976,20 @@ header h1 a:active {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 
-#story-manager-page .story-manager-heading > div:nth-child(2) {
-    grid-column: 2;
-    grid-row: 1;
-    min-width: 0;
-}
-
 #story-manager-page .manager-story-description {
     line-height: 1.7;
     overflow-wrap: anywhere;
 }
 
 @media (max-width: 650px) {
-    #story-manager-page .story-manager-heading {
-        grid-template-columns: 1fr;
-    }
-
-    #story-manager-page .manager-cover-container,
-    #story-manager-page .story-manager-heading > div:nth-child(2) {
-        grid-column: 1;
-        grid-row: auto;
-    }
-
     #story-manager-page .manager-cover-container {
+        float: none;
         width: 150px;
-        margin: 0 auto;
+        margin: 0 auto 20px;
+    }
+
+    #story-manager-page .manager-story-details {
+        width: 100%;
     }
 }
 
@@ -3033,4 +3034,64 @@ header h1 a:active {
     }
 }
 
+/* Manage Story - Dashboard Layout Fix */
 
+#story-manager-page .story-dashboard-stats {
+    clear: both;
+    width: 100%;
+}
+
+#story-manager-page .story-status-section {
+    clear: both;
+    width: 100%;
+}
+
+#story-manager-page .manager-story-status {
+    clear: both;
+}
+
+#story-manager-page .edit-story-button,
+#story-manager-page .continue-writing-button {
+    float: none;
+    width: auto;
+    max-width: 100%;
+}
+
+/* Manage Story - Full Width Sections */
+
+#story-manager-page .manager-story-heading,
+#story-manager-page .story-manager-heading {
+    width: 100%;
+}
+
+#story-manager-page .story-manager-heading > .manager-story-details {
+    display: block;
+    min-width: 0;
+}
+
+#story-manager-page .story-manager-heading > .manager-story-status,
+#story-manager-page .story-manager-heading > .story-dashboard-stats,
+#story-manager-page .story-manager-heading > .story-status-section {
+    display: flex;
+    clear: both;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#story-manager-page .story-manager-heading > .story-dashboard-stats {
+    display: grid;
+}
+
+#story-manager-page .edit-story-button,
+#story-manager-page .continue-writing-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-height: 44px;
+    height: auto;
+    padding: 12px 20px;
+    margin: 8px 12px 8px 0;
+    vertical-align: middle;
+    box-sizing: border-box;
+}
