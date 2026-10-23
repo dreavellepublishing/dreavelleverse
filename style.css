@@ -3139,3 +3139,57 @@ header h1 a:active {
     grid-column: auto;
     grid-row: auto;
 }
+
+
+/* Manage Story - Action Controls Layout */
+
+#story-manager-page .manager-actions-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    width: 100%;
+    margin: 20px 0 28px;
+}
+
+#story-manager-page .manager-actions-row .story-status-section {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    width: auto;
+    margin: 0;
+    padding: 12px 16px;
+    flex: 0 1 auto;
+}
+
+#story-manager-page .manager-actions-row .edit-story-button,
+#story-manager-page .manager-actions-row .continue-writing-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    float: none;
+    width: auto;
+    min-width: 180px;
+    max-width: 100%;
+    min-height: 46px;
+    height: auto;
+    margin: 0;
+    padding: 12px 18px;
+    box-sizing: border-box;
+    text-align: center;
+    white-space: normal;
+}
+
+@media (max-width: 700px) {
+    #story-manager-page .manager-actions-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #story-manager-page .manager-actions-row .story-status-section,
+    #story-manager-page .manager-actions-row .edit-story-button,
+    #story-manager-page .manager-actions-row .continue-writing-button {
+        width: 100%;
+    }
+}
