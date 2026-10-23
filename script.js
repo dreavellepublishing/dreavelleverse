@@ -5831,6 +5831,25 @@ if (writerStoryList) {
         for (const story of stories) {
             const item = document.createElement("div");
             item.className = "writer-story-item";
+            const cover = document.createElement("img");
+
+cover.className = "writer-story-cover";
+cover.alt = story.title || "Story Cover";
+
+const coverUrl =
+    story.cover_url ||
+    story.cover_image ||
+    story.cover ||
+    "";
+
+if (coverUrl) {
+    cover.src = coverUrl;
+    cover.loading = "lazy";
+} else {
+    cover.style.display = "none";
+}
+
+item.appendChild(cover);
             const title = document.createElement("strong");
             title.textContent = story.title || "Untitled Story";
             const status = document.createElement("span");
