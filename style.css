@@ -3095,3 +3095,47 @@ header h1 a:active {
     vertical-align: middle;
     box-sizing: border-box;
 }
+
+/* ==========================================
+   MANAGE STORY - STATUS AND ACTION BUTTON FIX
+   ========================================== */
+
+#story-manager-page .story-status-section {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    width: fit-content;
+    max-width: 100%;
+    min-height: 0;
+    height: auto;
+    margin: 20px 12px 20px 0;
+    padding: 14px 18px;
+    vertical-align: middle;
+    box-sizing: border-box;
+}
+
+#story-manager-page .edit-story-button,
+#story-manager-page .continue-writing-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-width: 180px;
+    max-width: 100%;
+    min-height: 46px;
+    height: auto;
+    padding: 12px 18px;
+    margin: 8px 12px 8px 0;
+    text-align: center;
+    vertical-align: middle;
+    white-space: normal;
+    box-sizing: border-box;
+}
+
+#story-manager-page .story-manager-heading > .story-status-section,
+#story-manager-page .story-manager-heading > .edit-story-button,
+#story-manager-page .story-manager-heading > .continue-writing-button {
+    grid-column: auto;
+    grid-row: auto;
+}
