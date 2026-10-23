@@ -57,6 +57,47 @@
     myStories = (stories || []).filter(
       s => s.user_id === userId
     );
+    // Populate the story promotion dashboard selector.
+const promotionStorySelect = $('promotion-story-select');
+const promotionStoryProgress = $('promotion-story-progress');
+
+if (promotionStorySelect) {
+  promotionStorySelect.replaceChildren();
+
+  if (myStories.length === 0) {
+    const emptyOption = make('option', 'No published stories yet');
+    emptyOption.value = '';
+    promotionStorySelect.append(emptyOption);
+
+    if (promotionStoryProgress) {
+      promotionStoryProgress.textContent =
+        'Publish a story to start tracking its promotion progress.';
+    }
+  } else {
+    for (const story of myStories) {
+      option(promotionStorySelect, story);
+    }
+
+    const showSelectedStory = () => {
+      const selectedStory = myStories.find(
+        story => story.id === promotionStorySelect.value
+      );
+
+      if (promotionStoryProgress) {
+        promotionStoryProgress.textContent = selectedStory
+          ? `Selected story: ${selectedStory.title}. Story-specific progress and calendar will be added next.`
+          : 'Select a story to view its progress.';
+      }
+    };
+
+    promotionStorySelect.addEventListener(
+      'change',
+      showSelectedStory
+    );
+
+    showSelectedStory();
+  }
+}
 
     status.textContent = myStories.length
       ? 'Redeem a ticket below to feature one of your published stories.'
