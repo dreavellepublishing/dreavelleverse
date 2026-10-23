@@ -5887,6 +5887,9 @@ if (fullDescription.length > previewLength) {
 } else {
     description.textContent = fullDescription;
 }
+            const reads = document.createElement("span");
+reads.className = "writer-story-reads";
+reads.textContent = `👁 ${Number(story.total_reads || 0).toLocaleString()} Reads`;
             const status = document.createElement("span");
             status.textContent = ` (${story.status || "Draft"}) `;
             const manage = document.createElement("button");
@@ -5901,7 +5904,7 @@ if (fullDescription.length > previewLength) {
                 localStorage.setItem("dreavelleVerseCurrentChapter", "1");
                 window.location.href = "story-manager.html";
             });
-           item.append(title, status, description, manage);
+         item.append(title, status, reads, description, manage);
             writerStoryList.appendChild(item);
         }
     })();
