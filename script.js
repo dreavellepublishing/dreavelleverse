@@ -933,9 +933,42 @@ if (managerStoryCover) {
 }
 
         if (managerStoryDescription) {
-            managerStoryDescription.textContent =
-                story.description || "";
-        }
+    const fullDescription = story.description || "";
+    const previewLength = 280;
+
+    managerStoryDescription.textContent = "";
+
+    if (fullDescription.length > previewLength) {
+        const previewText = document.createElement("span");
+        previewText.textContent =
+            fullDescription.slice(0, previewLength).trimEnd() + "... ";
+
+        const readMoreButton = document.createElement("button");
+        readMoreButton.type = "button";
+        readMoreButton.className = "manager-read-more";
+        readMoreButton.textContent = "Read More";
+
+        let expanded = false;
+
+        readMoreButton.addEventListener("click", () => {
+            expanded = !expanded;
+
+            previewText.textContent = expanded
+                ? fullDescription + " "
+                : fullDescription.slice(0, previewLength).trimEnd() + "... ";
+
+            readMoreButton.textContent =
+                expanded ? "Show Less" : "Read More";
+        });
+
+        managerStoryDescription.append(
+            previewText,
+            readMoreButton
+        );
+    } else {
+        managerStoryDescription.textContent = fullDescription;
+    }
+}
 
         if (managerStoryAuthor) {
             managerStoryAuthor.textContent =
