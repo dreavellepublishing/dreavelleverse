@@ -856,7 +856,7 @@ if (!storyId) {
             await supabaseClient
                 .from("stories")
                 .select(
-                    "title, author, description, genre, tags"
+                    "title, author, description, genre, tags, cover_url"
                 )
                 .eq("id", storyId)
                 .eq("user_id", session.user.id)
@@ -919,6 +919,18 @@ if (!storyId) {
 
         managerStoryTitle.textContent =
             story.title || "Untitled Story";
+        const managerStoryCover =
+    document.getElementById("manager-story-cover");
+
+if (managerStoryCover) {
+    if (story.cover_url) {
+        managerStoryCover.src = story.cover_url;
+        managerStoryCover.style.display = "block";
+    } else {
+        managerStoryCover.removeAttribute("src");
+        managerStoryCover.style.display = "none";
+    }
+}
 
         if (managerStoryDescription) {
             managerStoryDescription.textContent =
