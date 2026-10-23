@@ -5906,6 +5906,13 @@ if (likesError) {
             const reads = document.createElement("span");
 reads.className = "writer-story-reads";
 reads.textContent = `👁 ${Number(story.total_reads || 0).toLocaleString()} Reads`;
+            const completionStatus = document.createElement("span");
+completionStatus.className = "writer-story-completion";
+
+completionStatus.textContent =
+    story.completion_status === "Completed"
+        ? "✓ Completed"
+        : "◷ Ongoing";
             const status = document.createElement("span");
             status.textContent = ` (${story.status || "Draft"}) `;
             const manage = document.createElement("button");
@@ -5920,7 +5927,15 @@ reads.textContent = `👁 ${Number(story.total_reads || 0).toLocaleString()} Rea
                 localStorage.setItem("dreavelleVerseCurrentChapter", "1");
                 window.location.href = "story-manager.html";
             });
-         item.append(title, status, reads, likes, description, manage);
+         item.append(
+    title,
+    status,
+    completionStatus,
+    reads,
+    likes,
+    description,
+    manage
+);
             writerStoryList.appendChild(item);
         }
     })();
