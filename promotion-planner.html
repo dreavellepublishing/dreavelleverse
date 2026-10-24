@@ -171,6 +171,27 @@
         padding: 20px;
       }
     }
+  
+    .dv-private-label{font-size:.72rem;background:#f3eaf9;border-radius:30px;padding:5px 10px;vertical-align:middle}
+    .dv-promotion-entry{display:flex;gap:14px;align-items:flex-start}
+    .dv-promotion-entry strong{display:block;color:#553577;font-size:1.05rem}
+    .dv-promotion-meta{font-size:.9rem;color:#626173;margin-top:4px}
+    .dv-promotion-status{display:inline-block;border-radius:20px;padding:2px 9px;background:#e7f4ed;color:#286643;font-size:.75rem;font-weight:700}
+    .dv-promotion-status.upcoming{background:#f1ebfa;color:#6e42a1}
+    .dv-promotion-status.expired{background:#f0f0f0;color:#555}
+    .dv-progress-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:15px 0}
+    .dv-progress-stats>div{background:#f8f2fd;padding:15px;border-radius:12px;text-align:center}
+    .dv-progress-stats strong{display:block;font-size:1.35rem;color:#654091}
+    .dv-progress-stats span{font-size:.8rem;color:#646174}
+    .dv-progress-toolbar{display:flex;align-items:center;justify-content:center;gap:20px}
+    .dv-progress-toolbar button{border:1px solid #d8c8e8;background:white;border-radius:8px;padding:7px 14px;cursor:pointer}
+    .dv-progress-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:14px}
+    .dv-progress-calendar>strong{text-align:center;font-size:.8rem}
+    .dv-progress-day{min-height:65px;border:1px solid #e4dcea;border-radius:9px;background:white;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px;color:#302d37}
+    .dv-progress-day small{font-size:.65rem}
+    .dv-progress-day.active{background:#ede2f6;border-color:#8050ad}
+    .dv-progress-day:focus-visible{outline:3px solid #8050ad}
+    @media(max-width:600px){.dv-progress-calendar{gap:3px}.dv-progress-day{min-height:51px;padding:2px}.dv-progress-day small{font-size:.55rem}.dv-progress-stats>div{padding:8px}}
   </style>
 </head>
 
@@ -294,25 +315,22 @@
       </div>
     </div>
 
-    <div class="planner-card">
+    <div class="planner-card planner-wide" id="dv-private-progress-section" hidden>
       <div class="planner-icon">📅</div>
-      <h3>Story Update Calendar</h3>
-
-      <p>
-        Help readers discover upcoming chapters and
-        stay updated on your published stories.
-      </p>
-
-      <p>
-        Scheduled chapters appear automatically on the
-        public update calendar when their story is public.
-        You can manage chapter release dates through
-        the existing Chapter Editor.
-      </p>
-
-      <a class="planner-link" href="discover.html">
-        View Public Update Calendar
-      </a>
+      <h3>Calendar Progress <span class="dv-private-label">Private</span></h3>
+      <p>Your combined writing activity across all your stories. Only you can see this dashboard.</p>
+      <div class="dv-progress-stats">
+        <div><strong id="dv-progress-words">—</strong><span>Words this month</span></div>
+        <div><strong id="dv-progress-days">—</strong><span>Active days</span></div>
+        <div><strong id="dv-progress-chapters">—</strong><span>Chapters published</span></div>
+      </div>
+      <div class="dv-progress-toolbar">
+        <button type="button" id="dv-progress-prev" aria-label="Previous month">‹</button>
+        <h4 id="dv-progress-month"></h4>
+        <button type="button" id="dv-progress-next" aria-label="Next month">›</button>
+      </div>
+      <div id="dv-progress-calendar" class="dv-progress-calendar" aria-label="Private combined writing calendar"></div>
+      <p id="dv-progress-detail" aria-live="polite">Choose a day to view your progress.</p>
     </div>
 
     <div class="planner-footer">
@@ -324,7 +342,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="script.js"></script>
-<script src="promotion-planner.js?v=5"></script>
+<script src="promotion-planner.js?v=20261024-private-progress"></script>
 
 </body>
 </html>
