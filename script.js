@@ -7329,6 +7329,21 @@ loadLibrarySuggestions().catch(console.error);
       }
       if(!list.childElementCount)list.textContent='No visible member profiles.';
     }
+    // Populate both tab counts on initial render, not only after clicking a tab.
+    // Count queries avoid downloading member records just to show the totals.
+    const countQueries = [
+      ['followers', 'followed_id'],
+      ['following', 'follower_id']
+    ];
+    await Promise.all(countQueries.map(async ([key, column]) => {
+      const { count, error } = await supabaseClient.from('account_follows')
+        .select('*', { count: 'exact', head: true }).eq(column, accountId);
+      if (error) {
+        console.error('Could not load ' + key + ' count:', error);
+      } else {
+        buttons[key].textContent = (key === 'followers' ? 'Followers' : 'Following') + ' (' + (count ?? 0) + ')';
+      }
+    }));
     await load('followers');
   }
   window.dvFollowLists={mount};
