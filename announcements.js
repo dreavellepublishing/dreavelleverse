@@ -1,13 +1,30 @@
 (async()=>{
- const db=window.supabaseClient,$=id=>document.getElementById(id),status=$('dv-ann-status'),feed=$('dv-ann-feed');if(!db)return;
+ const db=window.supabaseClient,$=id=>document.getElementById(id),status=$('dv-ann-status'),feed=$('dv-ann-feed');if(!db){status.textContent='Unable to connect to Supabase. Please refresh.';feed.textContent='Unable to load announcements.';return;}
  const {data:{user}}=await db.auth.getUser();const make=(tag,text)=>{const e=document.createElement(tag);e.textContent=text;return e;};
  if(!user){$('dv-ann-editor').hidden=true;status.textContent='Log in to post announcements. You can still read recent public announcements.';}
- else {status.textContent='Announcements notify your followers. Maximum one announcement every 24 hours.';
+ else {status.textContent='Announcements notify your followers. You can post up to 3 per day (UAE time).';
  const {data:stories}=await db.from('stories').select('id,title').eq('user_id',user.id).eq('status','Published').limit(100);
  for(const s of stories||[]){const o=make('option',s.title);o.value=s.id;$('dv-ann-story').append(o);}
  $('dv-ann-form').onsubmit=async e=>{e.preventDefault();const b=e.currentTarget.querySelector('button');b.disabled=true;
   const payload={writer_id:user.id,story_id:$('dv-ann-story').value||null,title:$('dv-ann-title').value.trim(),body:$('dv-ann-body').value.trim()};
-  const {error}=await db.from('dv_writer_announcements').insert(payload);status.textContent=error?'Could not post: '+error.message:'Announcement posted! Followers have been notified.';if(!error){e.target.reset();await loadFeed();}b.disabled=false;};}
+  const {error}=await db.from('dv_writer_announcements').insert(payload);status.textContent=error?'Could not post: '+error.message:'Announcement posted! Followers have been notified.';if(!error){e.target.reset();await loadFeed();await loadDailyCount();}else{b.disabled=false;}};}
+ let activeFilter='all', allRows=[], followingIds=new Set();
+ const dubaiDay = date => new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Dubai',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(date));
+ async function loadDailyCount(){
+  if(!user)return;
+  const {data,error}=await db.from('dv_writer_announcements').select('created_at').eq('writer_id',user.id).order('created_at',{ascending:false}).limit(100);
+  const counter=$('dv-ann-count');
+  if(error){counter.textContent='Could not load daily allowance: '+error.message;return;}
+  const used=(data||[]).filter(a=>dubaiDay(a.created_at)===dubaiDay(Date.now())).length;
+  counter.textContent=`${used} of 3 announcements posted today · Resets at midnight UAE time`;
+  $('dv-ann-form').querySelector('button[type=submit]').disabled=used>=3;
+  if(used>=3)status.textContent='Daily limit reached. You can post again after midnight UAE time.';
+ }
+ document.querySelectorAll('.dv-ann-filter').forEach(b=>b.addEventListener('click',()=>{
+  activeFilter=b.dataset.filter;
+  document.querySelectorAll('.dv-ann-filter').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b));});
+  renderFeed();
+ }));
  let unreadAnnouncements = [];
  async function loadUnread() {
   unreadAnnouncements = [];
@@ -20,8 +37,20 @@
   else unreadAnnouncements = data || [];
  }
  async function loadFeed(){
-  await loadUnread();const {data,error}=await db.from('dv_writer_announcements').select('id,writer_id,story_id,title,body,created_at').order('created_at',{ascending:false}).limit(40);
- feed.replaceChildren();if(error){feed.textContent='Announcements unavailable. Install the accompanying Supabase SQL.';return;}
+  await loadUnread();
+  if(user){
+   const {data:follows,error:fe}=await db.from('account_follows').select('followed_id').eq('follower_id',user.id);
+   if(!fe)followingIds=new Set((follows||[]).map(f=>f.followed_id));
+   else console.warn('Could not load followed writers:',fe.message);
+  }
+  const {data,error}=await db.from('dv_writer_announcements').select('id,writer_id,story_id,title,body,created_at').order('created_at',{ascending:false}).limit(100);
+  if(error){feed.textContent='Could not load announcements: '+error.message;return;}
+  allRows=data||[];
+  await renderFeed();
+ }
+ async function renderFeed(){
+  const data=allRows.filter(a=>activeFilter==='all'||(activeFilter==='mine'?(user&&a.writer_id===user.id):(user&&a.writer_id!==user.id&&followingIds.has(a.writer_id))));
+  feed.replaceChildren();
  // Resolve public display names for the writers shown in this feed.
  const writerIds = [...new Set((data || []).map(a => a.writer_id).filter(Boolean))];
  const writerNames = new Map();
@@ -66,4 +95,5 @@
   if(targetItem){requestAnimationFrame(()=>targetItem.scrollIntoView({behavior:'smooth',block:'center'}));}
   if(!data?.length)feed.textContent='No announcements yet.';}
  await loadFeed();
+ if(user)await loadDailyCount();
 })().catch(console.error);
