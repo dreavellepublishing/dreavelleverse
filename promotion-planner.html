@@ -187,10 +187,25 @@
     .dv-progress-toolbar button{border:1px solid #d8c8e8;background:white;border-radius:8px;padding:7px 14px;cursor:pointer}
     .dv-progress-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:14px}
     .dv-progress-calendar>strong{text-align:center;font-size:.8rem}
-    .dv-progress-day{min-height:65px;border:1px solid #e4dcea;border-radius:9px;background:white;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px;color:#302d37}
+    /* Calendar Progress: only recorded writing days receive the strong theme color. */
+    body .dv-progress-calendar button.dv-progress-day{
+      min-height:65px; border:1px solid var(--theme-light, #e5f3f7);
+      border-radius:9px; background:var(--theme-soft, #f3fafc);
+      color:var(--theme-dark, #00506b); cursor:pointer;
+      display:flex;flex-direction:column;align-items:center;
+      justify-content:center;padding:4px;transition:background .15s ease,transform .15s ease;
+    }
     .dv-progress-day small{font-size:.65rem}
-    .dv-progress-day.active{background:#ede2f6;border-color:#8050ad}
-    .dv-progress-day:focus-visible{outline:3px solid #8050ad}
+    body .dv-progress-calendar button.dv-progress-day.active{
+      background:var(--theme-main, #006080);
+      border-color:var(--theme-dark, #00506b);
+      color:#fff;
+    }
+    body .dv-progress-calendar button.dv-progress-day.active small{color:#fff}
+    body .dv-progress-calendar button.dv-progress-day:hover{transform:translateY(-1px)}
+    body .dv-progress-calendar button.dv-progress-day:focus-visible{
+      outline:3px solid var(--theme-dark, #00506b);outline-offset:2px;
+    }
     @media(max-width:600px){.dv-progress-calendar{gap:3px}.dv-progress-day{min-height:51px;padding:2px}.dv-progress-day small{font-size:.55rem}.dv-progress-stats>div{padding:8px}}
   </style>
 </head>
