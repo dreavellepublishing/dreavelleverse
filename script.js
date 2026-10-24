@@ -2247,36 +2247,41 @@ readButtons.forEach(function(button){
 
 });
 
-/* Reader Chapter Navigation — use actual published chapters, not legacy localStorage. */
+/* Reader chapter navigation: chapter_number is the stored sequence key;
+   displayed labels must come from published chapter titles (Prologue, Chapter 1, etc.). */
 const previousButton = document.querySelector(".reading-navigation button:first-child");
 const nextButton = document.querySelector(".reading-navigation button:last-child");
-
 if (chapterContent && (previousButton || nextButton)) {
+    [previousButton, nextButton].forEach(button => { if (button) button.hidden = true; });
     (async () => {
         const params = new URLSearchParams(location.search);
         const storyId = params.get("id");
         const current = Number(params.get("chapter"));
-        if (!storyId || !Number.isInteger(current) || current < 1) return;
+        if (!storyId || !Number.isInteger(current) || current < 0) return;
         const { data: chapters, error } = await supabaseClient.from("chapters")
-            .select("chapter_number")
+            .select("chapter_number,title")
             .eq("story_id", storyId)
             .eq("status", "Published")
             .order("chapter_number", { ascending: true });
         if (error) { console.warn("Chapter navigation:", error); return; }
-        const numbers = [...new Set((chapters || []).map(c => Number(c.chapter_number)))].filter(Number.isInteger);
-        const previous = numbers.filter(n => n < current).pop();
-        const next = numbers.find(n => n > current);
-        const configure = (button, target, label) => {
-            if (!button) return;
-            button.textContent = target ? `${label} · Chapter ${target}` : label;
-            button.disabled = !target;
-            button.setAttribute("aria-disabled", String(!target));
-            if (target) button.onclick = () => {
-                location.href = `read-chapter.html?id=${encodeURIComponent(storyId)}&chapter=${target}`;
+        const ordered = (chapters || []).filter(c => Number.isInteger(Number(c.chapter_number)));
+        const position = ordered.findIndex(c => Number(c.chapter_number) === current);
+        if (position < 0) return;
+        const labelFor = c => (c.title || `Chapter ${c.chapter_number}`).trim();
+        const configure = (button, chapter, direction) => {
+            if (!button || !chapter) return;
+            button.hidden = false;
+            button.disabled = false;
+            button.removeAttribute("aria-disabled");
+            button.textContent = direction === "previous"
+                ? `← Previous · ${labelFor(chapter)}`
+                : `Next · ${labelFor(chapter)} →`;
+            button.onclick = () => {
+                location.href = `read-chapter.html?id=${encodeURIComponent(storyId)}&chapter=${encodeURIComponent(chapter.chapter_number)}`;
             };
         };
-        configure(previousButton, previous, "← Previous Chapter");
-        configure(nextButton, next, "Next Chapter →");
+        configure(previousButton, ordered[position - 1], "previous");
+        configure(nextButton, ordered[position + 1], "next");
     })();
 }
 
@@ -2739,17 +2744,29 @@ function addLibraryButtonEvents() {
             if (!bookmarks.has(x.story_id)) bookmarks.set(x.story_id,[]);
             bookmarks.get(x.story_id).push(x.chapter_number);
         });
-        document.querySelectorAll(".library-continue-button").forEach(button => {
-            const savedFromAccount = Number(progress.get(button.dataset.storyId));
-            const savedLocally = Number(localStorage.getItem(`dvLastRead:${userId}:${button.dataset.storyId}`));
-            const chapter = savedFromAccount > 0 ? savedFromAccount : savedLocally;
-            if (!Number.isInteger(chapter) || chapter < 1) return;
+        const continueButtons = [...document.querySelectorAll(".library-continue-button")];
+        const chapterTitles = new Map();
+        await Promise.all(continueButtons.map(async button => {
+            const storyId = button.dataset.storyId;
+            const savedFromAccount = Number(progress.get(storyId));
+            const savedLocally = Number(localStorage.getItem(`dvLastRead:${userId}:${storyId}`));
+            const chapter = Number.isInteger(savedFromAccount) && savedFromAccount >= 0 && progress.has(storyId)
+                ? savedFromAccount : savedLocally;
+            if (!Number.isInteger(chapter) || chapter < 0 || (!progress.has(storyId) && !localStorage.getItem(`dvLastRead:${userId}:${storyId}`))) return;
+            const { data, error } = await supabaseClient.from("chapters")
+                .select("chapter_number,title,status")
+                .eq("story_id",storyId)
+                .eq("chapter_number",chapter)
+                .eq("status","Published")
+                .maybeSingle();
+            if (error || !data) return;
+            const chapterTitle = (data.title || `Chapter ${chapter}`).trim();
             button.hidden = false;
-            button.textContent = `Continue Reading · Chapter ${chapter}`;
+            button.textContent = `Continue Reading · ${chapterTitle}`;
             button.addEventListener("click", () => {
-                location.href = `read-chapter.html?id=${encodeURIComponent(button.dataset.storyId)}&chapter=${chapter}`;
+                location.href = `read-chapter.html?id=${encodeURIComponent(storyId)}&chapter=${encodeURIComponent(chapter)}`;
             });
-        });
+        }));
         document.querySelectorAll(".library-bookmarks-button").forEach(button => {
             const chapters = [...new Set(bookmarks.get(button.dataset.storyId) || [])].sort((a,b)=>a-b);
             button.textContent = `View Bookmarks (${chapters.length})`;
