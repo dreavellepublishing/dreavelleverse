@@ -100,7 +100,17 @@
                </div>
              </div>
              </div>
-             <div class="dv-author-actions"><button type="button" id="dv-save-author-tools">Save Author's Corner</button></div>
+                           <section id="dv-author-poll-results-panel" class="dv-author-poll-results-panel" hidden aria-label="Reader Poll Results" style="margin-top:18px;padding:18px;border:1px solid #e3cfea;border-radius:12px;background:#fff;">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                  <h4 style="margin:0;color:#914cb0;">📊 Reader Poll Results</h4>
+                  <button type="button" id="dv-author-refresh-results" style="border:1px solid #914cb0;color:#914cb0;background:white;border-radius:8px;padding:8px 12px;cursor:pointer;">Refresh results</button>
+                </div>
+                <p id="dv-author-results-question" style="margin:12px 0 4px;font-weight:600;"></p>
+                <p id="dv-author-results-total" style="margin:0 0 14px;color:#62556a;"></p>
+                <div id="dv-author-results-bars"></div>
+                <p id="dv-author-results-message" role="status" aria-live="polite"></p>
+              </section>
+<div class="dv-author-actions"><button type="button" id="dv-save-author-tools">Save Author's Corner</button></div>
              <p id="dv-author-tools-status" role="status" aria-live="polite"></p>
              <p class="dv-author-hint">Save the chapter first. Your note and poll appear to readers only when this chapter is published. Saving here is separate from saving the chapter.</p>
            </section>
@@ -191,6 +201,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="script.js"></script>
 <script defer src="chapter-engagement.js?v=20261024"></script>
+    <script defer src="author-poll-results.js?v=20261024-1"></script>
 </body>
 
 </html>
