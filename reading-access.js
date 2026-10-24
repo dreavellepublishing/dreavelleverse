@@ -3,7 +3,7 @@
   'use strict';
   const db = window.supabaseClient;
   if (!db) return;
-  const allowedPath = /^(?:read-story|read-chapter)\.html$/i;
+  const allowedPath = /^(?:read-story|read-chapter|public-profile)\.html$/i;
   const safeDestination = value => {
     if (!value) return null;
     try {
@@ -69,12 +69,17 @@
     if (!anchor || event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
     const destination = safeDestination(anchor.href);
     if (!destination) return;
+    const isProfile = /public-profile\.html$/i.test(new URL(anchor.href).pathname);
+    if (isProfile && !anchor.closest('#dv-suggest-people')) return;
     event.preventDefault();
     try {
       const { data: { session }, error } = await db.auth.getSession();
       if (error) throw error;
       if (session?.user) { location.assign(destination); return; }
     } catch (error) { console.warn('Reading sign-in check:', error); }
+    overlay.querySelector('#dv-reading-title').textContent = isProfile ? 'Connect with DreavelleVerse Members!' : 'Your Next Story Awaits!';
+    overlay.querySelector('.dv-reading-dialog > p').textContent = isProfile ? 'Log in or create your free DreavelleVerse account to view this profile and follow other members.' : 'Log in or create your free DreavelleVerse account to start reading this story.';
+    overlay.querySelector('.dv-reading-dialog > small').textContent = isProfile ? 'Free to join · Continue to the selected profile after signing in' : 'Free to join · Continue to your chosen story after signing in';
     const next = encodeURIComponent(destination);
     overlay.querySelector('.dv-reading-login').href = 'login.html?next=' + next;
     overlay.querySelector('.dv-reading-signup').href = 'signup.html?next=' + next;
