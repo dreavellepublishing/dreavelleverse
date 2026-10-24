@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Chapter Editor | DreavelleVerse</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20261024-author-corner-layout">
 </head>
 
 <body id="chapter-editor-page">
@@ -84,11 +84,11 @@
             ></textarea>
 
            <section class="dv-author-tools" aria-labelledby="dv-author-tools-heading">
-             <h3 id="dv-author-tools-heading">✍️ Author's Corner <small>(Optional)</small></h3>
-             <label for="dv-author-note">Author's Note — up to 300 words</label>
+             <div class="dv-author-heading"><div><h3 id="dv-author-tools-heading">✍️ Author's Corner <span class="dv-author-optional">Optional</span></h3><p class="dv-author-description">Share a message with your readers or invite them to join a chapter poll.</p></div></div>
+             <label for="dv-author-note">Author's Note</label>
              <textarea id="dv-author-note" rows="5" placeholder="Share a message with your readers (optional)"></textarea>
-             <p id="dv-author-note-count">0 / 300 words</p>
-             <label class="dv-poll-toggle"><input type="checkbox" id="dv-poll-enabled"> Add a reader poll to this chapter</label>
+             <div class="dv-author-count-row"><span>Maximum 300 words</span><span id="dv-author-note-count">0 / 300 words</span></div>
+             <div class="dv-author-poll-area"><label class="dv-poll-toggle"><input type="checkbox" id="dv-poll-enabled"> <span>Add a reader poll to this chapter <small>(Optional)</small></span></label><p class="dv-author-poll-help">Ask one question with 2–4 choices.</p>
              <div id="dv-poll-editor" hidden>
                <label for="dv-poll-question">Poll question</label>
                <input id="dv-poll-question" type="text" maxlength="200" placeholder="What do you think happens next?">
@@ -99,7 +99,8 @@
                  <input type="text" maxlength="120" placeholder="Choice 4 (optional)" aria-label="Poll choice 4">
                </div>
              </div>
-             <button type="button" id="dv-save-author-tools">Save Author's Corner</button>
+             </div>
+             <div class="dv-author-actions"><button type="button" id="dv-save-author-tools">Save Author's Corner</button></div>
              <p id="dv-author-tools-status" role="status" aria-live="polite"></p>
              <p class="dv-author-hint">Save the chapter first. Your note and poll appear to readers only when this chapter is published. Saving here is separate from saving the chapter.</p>
            </section>
