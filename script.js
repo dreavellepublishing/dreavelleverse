@@ -7329,19 +7329,20 @@ loadLibrarySuggestions().catch(console.error);
       }
       if(!list.childElementCount)list.textContent='No visible member profiles.';
     }
-    // Populate both tab counts on initial render, not only after clicking a tab.
-    // Count queries avoid downloading member records just to show the totals.
-    const countQueries = [
-      ['followers', 'followed_id'],
-      ['following', 'follower_id']
-    ];
-    await Promise.all(countQueries.map(async ([key, column]) => {
-      const { count, error } = await supabaseClient.from('account_follows')
-        .select('*', { count: 'exact', head: true }).eq(column, accountId);
+    // Use the same row query that works when a tab is clicked.
+    // This also avoids count-only requests returning no count under some policies.
+    await Promise.all(['followers', 'following'].map(async (key) => {
+      const column = key === 'followers' ? 'followed_id' : 'follower_id';
+      const memberColumn = key === 'followers' ? 'follower_id' : 'followed_id';
+      const { data, error } = await supabaseClient.from('account_follows')
+        .select('follower_id,followed_id').eq(column, accountId).limit(500);
       if (error) {
         console.error('Could not load ' + key + ' count:', error);
+        buttons[key].textContent = (key === 'followers' ? 'Followers' : 'Following') + ' (—)';
       } else {
-        buttons[key].textContent = (key === 'followers' ? 'Followers' : 'Following') + ' (' + (count ?? 0) + ')';
+        const uniqueIds = new Set((data || []).map(row => row[memberColumn]).filter(Boolean));
+        buttons[key].textContent = (key === 'followers' ? 'Followers' : 'Following') +
+          ' (' + uniqueIds.size + ((data || []).length === 500 ? '+' : '') + ')';
       }
     }));
     await load('followers');
