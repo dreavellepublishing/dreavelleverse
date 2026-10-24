@@ -83,6 +83,27 @@
                 placeholder="Start writing your chapter..."
             ></textarea>
 
+           <section class="dv-author-tools" aria-labelledby="dv-author-tools-heading">
+             <h3 id="dv-author-tools-heading">✍️ Author's Corner <small>(Optional)</small></h3>
+             <label for="dv-author-note">Author's Note — up to 300 words</label>
+             <textarea id="dv-author-note" rows="5" placeholder="Share a message with your readers (optional)"></textarea>
+             <p id="dv-author-note-count">0 / 300 words</p>
+             <label class="dv-poll-toggle"><input type="checkbox" id="dv-poll-enabled"> Add a reader poll to this chapter</label>
+             <div id="dv-poll-editor" hidden>
+               <label for="dv-poll-question">Poll question</label>
+               <input id="dv-poll-question" type="text" maxlength="200" placeholder="What do you think happens next?">
+               <div id="dv-poll-options">
+                 <input type="text" maxlength="120" placeholder="Choice 1" aria-label="Poll choice 1">
+                 <input type="text" maxlength="120" placeholder="Choice 2" aria-label="Poll choice 2">
+                 <input type="text" maxlength="120" placeholder="Choice 3 (optional)" aria-label="Poll choice 3">
+                 <input type="text" maxlength="120" placeholder="Choice 4 (optional)" aria-label="Poll choice 4">
+               </div>
+             </div>
+             <button type="button" id="dv-save-author-tools">Save Author's Corner</button>
+             <p id="dv-author-tools-status" role="status" aria-live="polite"></p>
+             <p class="dv-author-hint">Save the chapter first. Your note and poll appear to readers only when this chapter is published. Saving here is separate from saving the chapter.</p>
+           </section>
+
            <div class="chapter-schedule-section" id="chapter-schedule-section">
     <p class="chapter-schedule-title">Schedule Chapter</p>
 
@@ -168,6 +189,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="script.js"></script>
+<script defer src="chapter-engagement.js?v=20261024"></script>
 </body>
 
 </html>

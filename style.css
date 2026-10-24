@@ -3620,3 +3620,12 @@ header h1 a:active {
 .reading-navigation { gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 18px; }
 .reading-navigation button { flex: 1 1 180px; max-width: 300px; }
 .reading-navigation button:disabled { opacity: .45; cursor: not-allowed; }
+
+/* Optional per-chapter author notes and polls */
+.dv-author-tools{margin:24px 0;padding:22px;border:1px solid #d9c6eb;border-radius:14px;background:var(--card-background,#fff);color:inherit}
+.dv-author-tools h3{margin:0 0 14px}.dv-author-tools label{display:block;font-weight:600;margin:12px 0 6px}
+.dv-author-tools textarea,.dv-author-tools input[type="text"]{box-sizing:border-box;width:100%;padding:11px;margin:4px 0;border:1px solid #cbbad9;border-radius:8px;background:var(--input-background,#fff);color:inherit;font:inherit}
+.dv-author-tools .dv-poll-toggle{display:flex;align-items:center;gap:8px}.dv-author-tools button{padding:10px 16px;border:0;border-radius:8px;background:var(--primary-color,#8150ad);color:#fff;cursor:pointer}
+.dv-author-tools button:disabled{opacity:.55;cursor:not-allowed}.dv-author-hint,#dv-author-note-count{font-size:.85rem;opacity:.8}
+#dv-reader-author-note-text{white-space:pre-wrap;overflow-wrap:anywhere}#dv-reader-poll-options label{display:flex;align-items:center;gap:8px;font-weight:normal}
+.dv-poll-result{margin:9px 0}.dv-poll-bar{height:9px;border-radius:8px;background:#e8e1ee;overflow:hidden}.dv-poll-bar span{display:block;height:100%;background:var(--primary-color,#8150ad)}
