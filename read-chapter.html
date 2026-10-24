@@ -8,7 +8,7 @@
 
     <title>Read Chapter | DreavelleVerse</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20261024-auto-continue-nav">
 
 </head>
 
@@ -169,27 +169,13 @@
 
 </div>
 
-        <div class="reading-navigation">
-
-            <button>
-                Previous Chapter
-            </button>
-
-
-            <button>
-                Next Chapter
-            </button>
-
+        <div class="reading-completion">
+            <button type="button" id="mark-completed-button" style="display: none;">Mark as Completed</button>
         </div>
-<div class="reading-completion">
-    <button
-        type="button"
-        id="mark-completed-button"
-        style="display: none;"
-    >
-        Mark as Completed
-    </button>
-</div>
+        <div class="reading-navigation" aria-label="Chapter navigation">
+            <button type="button" disabled>← Previous Chapter</button>
+            <button type="button" disabled>Next Chapter →</button>
+        </div>
 
     </div>
 
@@ -201,7 +187,7 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="script.js?v=20261024-reader-progress-fix"></script>
+<script src="script.js?v=20261024-auto-continue-nav"></script>
 
 
 </body>

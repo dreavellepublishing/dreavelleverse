@@ -3615,3 +3615,8 @@ header h1 a:active {
 .library-continue-button[hidden],.library-bookmarks-list[hidden]{display:none!important}
 .library-bookmarks-list{padding:8px;background:#faf7fc;border-radius:8px;margin-top:6px}
 .library-bookmark-link{display:block;padding:6px;color:#573276;text-decoration:underline}
+
+/* Reader navigation: visible at the bottom and keyboard accessible */
+.reading-navigation { gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 18px; }
+.reading-navigation button { flex: 1 1 180px; max-width: 300px; }
+.reading-navigation button:disabled { opacity: .45; cursor: not-allowed; }

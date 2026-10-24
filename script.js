@@ -2180,10 +2180,13 @@ if (chapterContent) {
 
             chapterContent.textContent =
                 chapter.content || "";
+            // Local, per-reader fallback is saved on chapter open, independent of bookmarks/completion.
+            // The account-specific key is also used if a progress table write fails.
             // Save the actual chapter URL, not a shared localStorage chapter value.
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session) {
+                    localStorage.setItem(`dvLastRead:${session.user.id}:${storyId}`, String(chapterNumber));
                     const { error: progressError } = await supabaseClient.from("reading_progress").upsert({
                         user_id: session.user.id, story_id: storyId,
                         last_read_chapter: chapterNumber, updated_at: new Date().toISOString()
@@ -2244,115 +2247,40 @@ readButtons.forEach(function(button){
 
 });
 
-/* Reader Chapter Navigation */
+/* Reader Chapter Navigation — use actual published chapters, not legacy localStorage. */
+const previousButton = document.querySelector(".reading-navigation button:first-child");
+const nextButton = document.querySelector(".reading-navigation button:last-child");
 
-const previousButton = document.querySelector(
-    ".reading-navigation button:first-child"
-);
-
-const nextButton = document.querySelector(
-    ".reading-navigation button:last-child"
-);
-
-if (chapterContent) {
-
-    const currentReadingChapter = Number(
-        localStorage.getItem(
-            "dreavelleVerseReadingChapter"
-        ) || "1"
-    );
-
-    const totalChapters = Number(
-        localStorage.getItem(
-            "dreavelleVerseTotalChapters"
-        ) || "1"
-    );
-
-    let previousPublishedChapter = null;
-    let nextPublishedChapter = null;
-
-    /* Find previous published chapter */
-
-    for (
-        let i = currentReadingChapter - 1;
-        i >= 1;
-        i--
-    ) {
-
-        const savedChapter = localStorage.getItem(
-            `dreavelleVerseChapter${i}`
-        );
-
-        if (savedChapter) {
-
-            const chapterData =
-                JSON.parse(savedChapter);
-
-            if (
-                chapterData.status &&
-                chapterData.status.toLowerCase() === "published"
-            ) {
-                previousPublishedChapter = i;
-                break;
-            }
-        }
-    }
-
-    /* Find next published chapter */
-
-    for (
-        let i = currentReadingChapter + 1;
-        i <= totalChapters;
-        i++
-    ) {
-
-        const savedChapter = localStorage.getItem(
-            `dreavelleVerseChapter${i}`
-        );
-
-        if (savedChapter) {
-
-            const chapterData =
-                JSON.parse(savedChapter);
-
-            if (
-                chapterData.status &&
-                chapterData.status.toLowerCase() === "published"
-            ) {
-                nextPublishedChapter = i;
-                break;
-            }
-        }
-    }
-
-    /* Previous Chapter Button */
-
-if (previousButton) {
-
-    if (previousPublishedChapter === null) {
-
-        previousButton.style.display = "none";
-
-    } else {
-
-        previousButton.style.display = "";
-
-        previousButton.onclick = function () {
-
-            localStorage.setItem(
-                "dreavelleVerseReadingChapter",
-                previousPublishedChapter.toString()
-            );
-
-            localStorage.setItem(
-                "dreavelleVerseLastReadChapter",
-                previousPublishedChapter.toString()
-            );
-
-            location.reload();
+if (chapterContent && (previousButton || nextButton)) {
+    (async () => {
+        const params = new URLSearchParams(location.search);
+        const storyId = params.get("id");
+        const current = Number(params.get("chapter"));
+        if (!storyId || !Number.isInteger(current) || current < 1) return;
+        const { data: chapters, error } = await supabaseClient.from("chapters")
+            .select("chapter_number")
+            .eq("story_id", storyId)
+            .eq("status", "Published")
+            .order("chapter_number", { ascending: true });
+        if (error) { console.warn("Chapter navigation:", error); return; }
+        const numbers = [...new Set((chapters || []).map(c => Number(c.chapter_number)))].filter(Number.isInteger);
+        const previous = numbers.filter(n => n < current).pop();
+        const next = numbers.find(n => n > current);
+        const configure = (button, target, label) => {
+            if (!button) return;
+            button.textContent = target ? `${label} · Chapter ${target}` : label;
+            button.disabled = !target;
+            button.setAttribute("aria-disabled", String(!target));
+            if (target) button.onclick = () => {
+                location.href = `read-chapter.html?id=${encodeURIComponent(storyId)}&chapter=${target}`;
+            };
         };
-    }
+        configure(previousButton, previous, "← Previous Chapter");
+        configure(nextButton, next, "Next Chapter →");
+    })();
 }
+
+// Completion remains an optional, reversible, per-chapter action.
 const markCompletedButton = document.querySelector("#mark-completed-button");
 if (markCompletedButton) {
     const params = new URLSearchParams(location.search);
@@ -2377,39 +2305,6 @@ if (markCompletedButton) {
             });
         })();
     }
-}
-
-    /* Next Chapter Button */
-
-if (nextButton) {
-
-    if (nextPublishedChapter === null) {
-
-        nextButton.style.display = "none";
-        if (markCompletedButton) {
-    markCompletedButton.style.display = "inline-block";
-}
-
-    } else {
-
-        nextButton.style.display = "";
-
-        nextButton.onclick = function () {
-
-            localStorage.setItem(
-                "dreavelleVerseReadingChapter",
-                nextPublishedChapter.toString()
-            );
-
-            localStorage.setItem(
-                "dreavelleVerseLastReadChapter",
-                nextPublishedChapter.toString()
-            );
-
-            location.reload();
-        };
-    }
-}
 }
 
 /* Discover: ten published stories, rotated daily, with compact cards. */
@@ -2845,8 +2740,10 @@ function addLibraryButtonEvents() {
             bookmarks.get(x.story_id).push(x.chapter_number);
         });
         document.querySelectorAll(".library-continue-button").forEach(button => {
-            const chapter = Number(progress.get(button.dataset.storyId));
-            if (!chapter) return;
+            const savedFromAccount = Number(progress.get(button.dataset.storyId));
+            const savedLocally = Number(localStorage.getItem(`dvLastRead:${userId}:${button.dataset.storyId}`));
+            const chapter = savedFromAccount > 0 ? savedFromAccount : savedLocally;
+            if (!Number.isInteger(chapter) || chapter < 1) return;
             button.hidden = false;
             button.textContent = `Continue Reading · Chapter ${chapter}`;
             button.addEventListener("click", () => {
