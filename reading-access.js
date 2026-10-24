@@ -70,7 +70,7 @@
     const destination = safeDestination(anchor.href);
     if (!destination) return;
     const isProfile = /public-profile\.html$/i.test(new URL(anchor.href).pathname);
-    if (isProfile && !anchor.closest('#dv-suggest-people')) return;
+    if (isProfile && !anchor.closest('#dv-suggest-people, #discover-users-results')) return;
     event.preventDefault();
     try {
       const { data: { session }, error } = await db.auth.getSession();
