@@ -2180,6 +2180,17 @@ if (chapterContent) {
 
             chapterContent.textContent =
                 chapter.content || "";
+            // Save the actual chapter URL, not a shared localStorage chapter value.
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session) {
+                    const { error: progressError } = await supabaseClient.from("reading_progress").upsert({
+                        user_id: session.user.id, story_id: storyId,
+                        last_read_chapter: chapterNumber, updated_at: new Date().toISOString()
+                    }, { onConflict: "user_id,story_id" });
+                    if (progressError) console.warn("Could not save chapter progress:",progressError);
+                }
+            } catch (progressError) { console.warn("Reading progress:",progressError); }
             
 if (story && chapter && chapter.content) {
     const { error: readError } =
@@ -2342,32 +2353,30 @@ if (previousButton) {
         };
     }
 }
-const markCompletedButton = document.querySelector(
-    "#mark-completed-button"
-);
+const markCompletedButton = document.querySelector("#mark-completed-button");
 if (markCompletedButton) {
-
-    const storyCompleted = localStorage.getItem(
-        "dreavelleVerseStoryCompleted"
-    );
-
-    if (storyCompleted === "true") {
-        markCompletedButton.textContent = "✓ Completed";
+    const params = new URLSearchParams(location.search);
+    const completionStory = params.get("id");
+    const completionChapter = Number(params.get("chapter"));
+    if (completionStory && Number.isInteger(completionChapter) && completionChapter > 0) {
+        markCompletedButton.style.display = "inline-block";
+        (async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) return;
+            const key = `dvCompleted:${session.user.id}:${completionStory}:${completionChapter}`;
+            const render = () => {
+                const done = localStorage.getItem(key) === "true";
+                markCompletedButton.textContent = done ? "↶ Mark as Unread" : "✓ Mark as Completed";
+                markCompletedButton.setAttribute("aria-pressed", String(done));
+            };
+            render();
+            markCompletedButton.addEventListener("click", () => {
+                if (localStorage.getItem(key) === "true") localStorage.removeItem(key);
+                else localStorage.setItem(key, "true");
+                render();
+            });
+        })();
     }
-
-    markCompletedButton.addEventListener(
-        "click",
-        function () {
-
-            localStorage.setItem(
-                "dreavelleVerseStoryCompleted",
-                "true"
-            );
-
-            markCompletedButton.textContent =
-                "✓ Completed";
-        }
-    );
 }
 
     /* Next Chapter Button */
@@ -2779,6 +2788,10 @@ function renderLibraryStories(stories) {
                         Start Reading
                     </button>
 
+                    <button type="button" class="library-continue-button" data-story-id="${story.id}" hidden>Continue Reading</button>
+                    <button type="button" class="library-bookmarks-button" data-story-id="${story.id}">View Bookmarks</button>
+                    <div class="library-bookmarks-list" data-story-id="${story.id}" hidden></div>
+
                     <button
                         type="button"
                         class="library-remove-button"
@@ -2813,6 +2826,52 @@ function addLibraryButtonEvents() {
         });
     });
 
+
+    // Reader-specific progress and chapter bookmarks from Supabase.
+    (async () => {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) return;
+        const userId = session.user.id;
+        const [progressResult, bookmarksResult] = await Promise.all([
+            supabaseClient.from("reading_progress").select("story_id,last_read_chapter").eq("user_id",userId),
+            supabaseClient.from("chapter_bookmarks").select("story_id,chapter_number").eq("user_id",userId)
+        ]);
+        if (progressResult.error) console.warn("Reading progress:",progressResult.error);
+        if (bookmarksResult.error) console.warn("Bookmarks:",bookmarksResult.error);
+        const progress = new Map((progressResult.data || []).map(x => [x.story_id,x.last_read_chapter]));
+        const bookmarks = new Map();
+        (bookmarksResult.data || []).forEach(x => {
+            if (!bookmarks.has(x.story_id)) bookmarks.set(x.story_id,[]);
+            bookmarks.get(x.story_id).push(x.chapter_number);
+        });
+        document.querySelectorAll(".library-continue-button").forEach(button => {
+            const chapter = Number(progress.get(button.dataset.storyId));
+            if (!chapter) return;
+            button.hidden = false;
+            button.textContent = `Continue Reading · Chapter ${chapter}`;
+            button.addEventListener("click", () => {
+                location.href = `read-chapter.html?id=${encodeURIComponent(button.dataset.storyId)}&chapter=${chapter}`;
+            });
+        });
+        document.querySelectorAll(".library-bookmarks-button").forEach(button => {
+            const chapters = [...new Set(bookmarks.get(button.dataset.storyId) || [])].sort((a,b)=>a-b);
+            button.textContent = `View Bookmarks (${chapters.length})`;
+            button.addEventListener("click", () => {
+                const list = document.querySelector(`.library-bookmarks-list[data-story-id="${button.dataset.storyId}"]`);
+                if (!list) return;
+                list.hidden = !list.hidden;
+                list.replaceChildren();
+                if (!chapters.length) {list.textContent="No bookmarked chapters yet.";return;}
+                chapters.forEach(chapter => {
+                    const link = document.createElement("a");
+                    link.href = `read-chapter.html?id=${encodeURIComponent(button.dataset.storyId)}&chapter=${chapter}`;
+                    link.textContent = `Chapter ${chapter}`;
+                    link.className = "library-bookmark-link";
+                    list.appendChild(link);
+                });
+            });
+        });
+    })();
 
     const removeButtons =
         document.querySelectorAll(".library-remove-button");
@@ -4416,6 +4475,7 @@ if (bookmarkChapterButton) {
         localStorage.getItem("dreavelleVerseReadingStoryId");
 
     const currentReadingChapter = Number(
+        new URLSearchParams(window.location.search).get("chapter") ||
         localStorage.getItem("dreavelleVerseReadingChapter") || "1"
     );
 

@@ -3609,3 +3609,9 @@ header h1 a:active {
 .dv-reading-signup { color: #5140a6 !important; background: #efebff; border: 1px solid #bcb1f2; }
 .dv-reading-dialog small { color: #747188; }
 @media(max-width:380px) { .dv-reading-actions { flex-direction: column; } }
+
+/* Reader library quick actions */
+.library-continue-button,.library-bookmarks-button{display:block;width:100%;margin-top:8px;padding:10px;border-radius:8px;border:1px solid #8351ad;background:#f5ecfb;color:#573276;font-weight:600;cursor:pointer}
+.library-continue-button[hidden],.library-bookmarks-list[hidden]{display:none!important}
+.library-bookmarks-list{padding:8px;background:#faf7fc;border-radius:8px;margin-top:6px}
+.library-bookmark-link{display:block;padding:6px;color:#573276;text-decoration:underline}
