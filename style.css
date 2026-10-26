@@ -3653,3 +3653,45 @@ body .dv-author-tools #dv-save-author-tools{display:inline-flex;align-items:cent
 body .dv-author-tools #dv-author-tools-status{margin:12px 0 0;overflow-wrap:anywhere}
 body .dv-author-tools .dv-author-hint{margin:10px 0 0;font-size:.83rem;color:#625b6c;line-height:1.5;opacity:1}
 @media(max-width:600px){body .dv-author-tools .dv-author-actions{display:block}body .dv-author-tools #dv-save-author-tools{width:100%}}
+
+
+/* Make Weekly Spotlight smaller on Home only */
+#home-page .dv-weekly-podium {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  align-items: end;
+  margin: 20px 0 34px;
+}
+
+#home-page .dv-weekly-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  text-align: center;
+  align-items: center;
+  border: 1px solid #e3d4f1;
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px 8px;
+  box-shadow: 0 5px 15px #3d22510c;
+}
+
+#home-page .dv-weekly-rank {
+  font-weight: 800;
+  color: #7950a2;
+}
+
+#home-page .dv-weekly-card .dv-weekly-image {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 9px;
+}
+
+@media (max-width: 700px) {
+  #home-page .dv-weekly-podium {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
