@@ -7,8 +7,8 @@
   const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
   const ranking=[4,2,1,3,5];
   const render=async(box,category)=>{
-    const entries=(data||[]).filter(r=>r.category===category&&Number(r.position)>=1&&Number(r.position)<=5);
-    const byRank=new Map(entries.map(r=>[Number(r.position),r]));
+   const entries=(data||[]).filter(r=>r.category===category&&Number(r.rank_number)>=1&&Number(r.rank_number)<=5);
+    const byRank=new Map(entries.map(r=>[Number(r.rank_number),r]));
     const ids=entries.map(r=>r.item_id);
     const table=category==='writer'?'profiles':'stories';
     let photos=new Map();
