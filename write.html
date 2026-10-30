@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -25,31 +26,32 @@
             <a href="notifications.html" id="notifications-nav-link">Notifications</a>
             <a href="login.html" id="login-nav-link">Log In</a>
 
-<a
-    href="signup.html"
-    class="signup-link"
-    id="signup-nav-link"
->
-    Sign Up
-</a>
+            <a
+                href="signup.html"
+                class="signup-link"
+                id="signup-nav-link"
+            >
+                Sign Up
+            </a>
 
-<span
-    id="user-nav"
-    style="display: none;"
->
-    <span id="user-display-name"></span>
+            <span
+                id="user-nav"
+                style="display: none;"
+            >
+                <span id="user-display-name"></span>
 
-    <button
-        type="button"
-        id="logout-button"
-    >
-        Log Out
-    </button>
-</span>
-        <a href="messages.html">Messages</a>
-<a href="announcements.html">Announcements</a>
-<a href="promotion-planner.html">Promotions</a>
-</nav>
+                <button
+                    type="button"
+                    id="logout-button"
+                >
+                    Log Out
+                </button>
+            </span>
+
+            <a href="messages.html">Messages</a>
+            <a href="announcements.html">Announcements</a>
+            <a href="promotion-planner.html">Promotions</a>
+        </nav>
     </header>
 
     <main>
@@ -67,26 +69,42 @@
                 DreavelleVerse is your space to bring your stories to life.
             </p>
 
-           <div class="writer-story-actions">
-    <a href="create-story.html" class="create-story-button" id="create-new-story-button">
-        Create New Story
-    </a>
+            <div class="writer-story-actions">
 
-    <a href="my-stories.html" class="create-story-button" id="manage-story-button">
-        Manage Your Story
-    </a>
-</div>
+                <a
+                    href="create-story.html"
+                    class="create-story-button"
+                    id="create-new-story-button"
+                >
+                    Create New Story
+                </a>
+
+                <a
+                    href="my-stories.html"
+                    class="create-story-button"
+                    id="manage-story-button"
+                >
+                    Manage Your Story
+                </a>
+
+            </div>
 
         </section>
 
         <section class="writer-stories-section">
-    <div id="writer-story-list"></div>
-</section>
+
+            <div id="writer-story-list"></div>
+
+        </section>
 
     </main>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="script.js"></script>
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Main DreavelleVerse functionality -->
+    <script src="script.js?v=20261030-writer-stars"></script>
 
 </body>
+
 </html>
