@@ -1,24 +1,19 @@
 
 /* DreavelleVerse - Writer Story Star Counts
-   Displays total chapter stars on writer story cards.
-   Read-only: does not modify existing records.
+   Read-only. Preserves existing story cards.
 */
 (() => {
-  const db = window.supabaseClient;
   const list = document.getElementById('writer-story-list');
+  if (!list) return;
 
-  if (!db || !list) return;
+  const cache = new Map();
+  const loading = new Map();
 
-  const starCache = new Map();
-  const pending = new Set();
+  function getDb() {
+    return window.supabaseClient;
+  }
 
-  function getStoryId(card) {
-    const link = card.querySelector(
-      'a[href*="story-manager.html"], a[href*="read-story.html"]'
-    );
-
-    if (!link) return null;
-
+  function storyIdFromLink(link) {
     try {
       const url = new URL(link.href, location.href);
       return url.searchParams.get('id') ||
@@ -28,36 +23,45 @@
     }
   }
 
-  async function loadStars(storyId, badge) {
-    if (starCache.has(storyId)) {
-      badge.textContent = `⭐ ${starCache.get(storyId)} Stars`;
-      return;
-    }
+  async function getStars(storyId) {
+    if (cache.has(storyId)) return cache.get(storyId);
+    if (loading.has(storyId)) return loading.get(storyId);
 
-    if (pending.has(storyId)) return;
-    pending.add(storyId);
+    const db = getDb();
+    if (!db) return null;
 
-    const { count, error } = await db
-      .from('dv_chapter_stars')
-      .select('*', { count: 'exact', head: true })
-      .eq('story_id', storyId);
+    const request = (async () => {
+      const { count, error } = await db
+        .from('dv_chapter_stars')
+        .select('*', { count: 'exact', head: true })
+        .eq('story_id', storyId);
 
-    pending.delete(storyId);
-
-    if (error) {
-      console.warn('Could not load story stars:', error);
-      badge.textContent = '⭐ — Stars';
-      return;
-    }
-
-    const total = count ?? 0;
-    starCache.set(storyId, total);
-
-    list.querySelectorAll('[data-dv-star-story]').forEach(node => {
-      if (node.dataset.dvStarStory === storyId) {
-        node.textContent = `⭐ ${total} Stars`;
+      if (error) {
+        console.warn('Star count error:', error);
+        return null;
       }
-    });
+
+      const total = count ?? 0;
+      cache.set(storyId, total);
+      return total;
+    })();
+
+    loading.set(storyId, request);
+
+    try {
+      return await request;
+    } finally {
+      loading.delete(storyId);
+    }
+  }
+
+  async function updateBadge(badge, storyId) {
+    const total = await getStars(storyId);
+    if (!badge.isConnected) return;
+
+    badge.textContent = total === null
+      ? '⭐ — Stars'
+      : `⭐ ${total} ${total === 1 ? 'Star' : 'Stars'}`;
   }
 
   function updateCards() {
@@ -66,42 +70,60 @@
     );
 
     links.forEach(link => {
-      const card = link.closest(
-        '.writer-story-card, .story-card, article'
-      );
-
-      if (!card || card.querySelector('[data-dv-star-story]')) {
-        return;
-      }
-
-      const storyId = getStoryId(card);
+      const storyId = storyIdFromLink(link);
       if (!storyId) return;
 
-      const badges = [...card.querySelectorAll(
-        'span, .story-stat, .story-badge'
-      )];
+      // Find the smallest ancestor containing the
+      // story's existing Likes badge.
+      let card = link.parentElement;
+      let likesBadge = null;
 
-      const likesBadge = badges.find(node =>
-        /\d+\s+Likes?\b/i.test(node.textContent.trim())
+      while (card && card !== list) {
+        const candidates = card.querySelectorAll(
+          'span, .story-stat, .story-badge'
+        );
+
+        likesBadge = [...candidates].find(node =>
+          /^\s*[♡♥❤️]?\s*\d+\s+Likes?\s*$/i
+            .test(node.textContent.trim())
+        );
+
+        if (likesBadge) break;
+        card = card.parentElement;
+      }
+
+      if (!likesBadge || !card || card === list) return;
+
+      let badge = card.querySelector(
+        `[data-dv-star-story="${CSS.escape(storyId)}"]`
       );
 
-      if (!likesBadge) return;
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = likesBadge.className;
+        badge.dataset.dvStarStory = storyId;
+        badge.textContent = '⭐ … Stars';
 
-      const starBadge = document.createElement('span');
+        likesBadge.insertAdjacentElement('afterend', badge);
+      }
 
-      starBadge.className = likesBadge.className;
-      starBadge.dataset.dvStarStory = storyId;
-      starBadge.textContent = '⭐ … Stars';
-
-      likesBadge.insertAdjacentElement('afterend', starBadge);
-
-      loadStars(storyId, starBadge);
+      updateBadge(badge, storyId);
     });
   }
 
-  const observer = new MutationObserver(() => {
-    updateCards();
-  });
+  let scheduled = false;
+
+  function scheduleUpdate() {
+    if (scheduled) return;
+    scheduled = true;
+
+    requestAnimationFrame(() => {
+      scheduled = false;
+      updateCards();
+    });
+  }
+
+  const observer = new MutationObserver(scheduleUpdate);
 
   observer.observe(list, {
     childList: true,
@@ -112,8 +134,8 @@
 
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
-      starCache.clear();
-      updateCards();
+      cache.clear();
+      scheduleUpdate();
     }
   });
 })();
