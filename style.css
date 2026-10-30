@@ -3695,3 +3695,16 @@ body .dv-author-tools .dv-author-hint{margin:10px 0 0;font-size:.83rem;color:#62
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* DreavelleVerse Writer Story Stars */
+.writer-story-stars {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: #f5edf7;
+    color: #663580;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+}
