@@ -5887,13 +5887,33 @@ storyStats.append(
     likes
 );
 
-storyDetails.append(
-    title,
-    storyStats,
-    description,
-    manage
-);
+// DreavelleVerse - Story Star Badge
+const stars = document.createElement("span");
+stars.className = "writer-story-stars";
+stars.textContent = "⭐ … Stars";
 
+const { count: starsCount, error: starsError } =
+    await supabaseClient
+        .from("dv_chapter_stars")
+        .select("*", { count: "exact", head: true })
+        .eq("story_id", story.id);
+
+if (starsError) {
+    console.warn("Could not load story stars:", starsError);
+    stars.textContent = "⭐ — Stars";
+} else {
+    stars.textContent =
+        `⭐ ${(starsCount ?? 0).toLocaleString()} Stars`;
+}
+
+// Display badges in the existing layout
+storyStats.append(
+    status,
+    completionStatus,
+    reads,
+    likes,
+    stars
+);
 item.appendChild(storyDetails);
             writerStoryList.appendChild(item);
         }
