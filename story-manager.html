@@ -55,6 +55,19 @@
                 padding: 5px 8px;
             }
         }
+
+        /* Promotion ticket dashboard card: matches existing chapter statistics. */
+        .dv-promotion-stat-link {
+            color: inherit;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .dv-promotion-stat-link:hover,
+        .dv-promotion-stat-link:focus-visible {
+            outline: 2px solid #00816f;
+            outline-offset: 2px;
+        }
+        .dv-promotion-stat-link .dashboard-stat-number { color: #76519a; }
     </style>
 </head>
 
@@ -190,6 +203,15 @@
                             </span>
                         </div>
 
+                        <a class="dashboard-stat dv-promotion-stat-link"
+                           href="promotion-planner.html"
+                           id="dv-manager-promotion-link"
+                           aria-label="View your available promotion tickets">
+                            <span class="dashboard-stat-number"
+                                  id="dv-manager-ticket-count" aria-live="polite">—</span>
+                            <span class="dashboard-stat-label">Promotion Tickets</span>
+                        </a>
+
                     </div>
 
                     <div class="manager-actions-row">
@@ -252,6 +274,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
     <script src="manager-story-stars.js?v=20261030" defer></script>
+    <script src="manager-promotion-tickets.js?v=20261030" defer></script>
 
 </body>
 </html>
