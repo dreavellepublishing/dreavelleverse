@@ -115,7 +115,35 @@
              <p class="dv-author-hint">Save the chapter first. Your note and poll appear to readers only when this chapter is published. Saving here is separate from saving the chapter.</p>
            </section>
 
-           <div class="chapter-schedule-section" id="chapter-schedule-section">
+           
+<section id="dv-r18-settings" aria-labelledby="dv-r18-heading" style="margin:24px 0;padding:20px;border:1px solid #d9c8df;border-radius:12px;background:#fff;">
+  <h3 id="dv-r18-heading">🔞 Chapter Content Warnings</h3>
+  <p>Choose warnings for this chapter. A content advisory does not automatically mean 18+.</p>
+  <label for="dv-warning-level">Warning level</label>
+  <select id="dv-warning-level" style="display:block;width:100%;max-width:420px;padding:10px;margin:8px 0 14px;">
+    <option value="general">General — no warning selected</option>
+    <option value="advisory">Content advisory — potentially disturbing themes</option>
+    <option value="r18">R18 — adults only</option>
+  </select>
+  <fieldset style="border:1px solid #e5d9e9;border-radius:8px;padding:12px;margin:10px 0;">
+    <legend>Content categories (select all that apply)</legend>
+    <div id="dv-warning-categories" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;">
+      <label><input type="checkbox" value="sexual_content"> Sexual content</label>
+      <label><input type="checkbox" value="graphic_violence"> Graphic violence</label>
+      <label><input type="checkbox" value="abuse"> Abuse</label>
+      <label><input type="checkbox" value="self_harm"> Self-harm themes</label>
+      <label><input type="checkbox" value="disturbing_content"> Disturbing content</label>
+      <label><input type="checkbox" value="substance_use"> Substance use</label>
+      <label><input type="checkbox" value="strong_language"> Strong language</label>
+      <label><input type="checkbox" value="other_mature_themes"> Other mature themes</label>
+    </div>
+  </fieldset>
+  <button type="button" id="dv-save-warning-settings" style="background:#75368d;color:white;border:0;border-radius:8px;padding:11px 18px;cursor:pointer;">Save Content Warnings</button>
+  <p id="dv-warning-status" role="status" aria-live="polite"></p>
+  <p style="font-size:0.9em;">Save the chapter first. These settings are saved separately. Reader access restrictions and automatic scanning are not active yet.</p>
+</section>
+
+<div class="chapter-schedule-section" id="chapter-schedule-section">
     <p class="chapter-schedule-title">Schedule Chapter</p>
 
     <div class="chapter-schedule-controls">
@@ -202,6 +230,7 @@
 <script src="script.js"></script>
 <script defer src="chapter-engagement.js?v=20261024"></script>
     <script defer src="author-poll-results.js?v=20261024-1"></script>
+<script defer src="r18-writer-settings.js?v=20261031-live1"></script>
 </body>
 
 </html>
