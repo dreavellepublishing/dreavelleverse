@@ -7,6 +7,11 @@
 
     <title>DreavelleVerse | Where Stories Come Alive</title>
     <link rel="stylesheet" href="style.css?v=20261024-reading-gate">
+    
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#173f9b">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+
 </head>
 
 <body id="home-page">
@@ -124,6 +129,17 @@
     <script src="home-promotions.js?v=20261023-home-showcase"></script>
     <script src="weekly-spotlight.js?v=20261023-redesign"></script>
 <script src="reading-access.js?v=20261024-gate1"></script>
+
+    
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/service-worker.js")
+      .catch(error => console.error("Service worker:", error));
+  });
+}
+</script>
+
 </body>
 
 </html>
