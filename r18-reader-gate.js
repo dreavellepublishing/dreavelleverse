@@ -48,11 +48,43 @@ window.dvR18SelfDeclarationGate = async function ({storyId,chapterNumber,chapter
     const {next}=await neighbors();if(next)route(next.chapter_number);
     else {message.textContent='There is no next eligible published chapter. You can choose the previous one instead.';await navigation();}
   }),button('Enter My Birthday',askBirthday));
-  // Hide chapter-specific interactions until the reader self-declares 18+.
-  const contentParent=chapter.parentElement;
-  const hidden=[];
-  for(const node of [...contentParent.children]) {if(node!==chapter && node.id!=='reading-chapter-title' && node.id!=='reading-story-title' && node.id!=='bible-verse-card'){hidden.push([node,node.hidden]);node.hidden=true;}}
-  const ok=await promise;
-  for(const [node,wasHidden] of hidden)node.hidden=wasHidden;
+
+  // Hide the entire chapter-specific interface while the advisory is active.
+  // The site's CSS may override the HTML hidden attribute.
+  const contentParent = chapter.parentElement;
+  const concealed = [];
+  const keepVisible = new Set([
+    chapter,
+    document.getElementById('reading-chapter-title'),
+    document.getElementById('reading-story-title'),
+    document.getElementById('bible-verse-card')
+  ]);
+
+  if (contentParent) {
+    for (const node of [...contentParent.children]) {
+      if (keepVisible.has(node)) continue;
+
+      concealed.push({
+        node,
+        display: node.style.getPropertyValue('display'),
+        priority: node.style.getPropertyPriority('display')
+      });
+
+      node.style.setProperty('display', 'none', 'important');
+    }
+  }
+
+  const ok = await promise;
+
+  // Restore the previous display settings after adult self-declaration.
+  for (const {node, display, priority} of concealed) {
+    if (display) {
+      node.style.setProperty('display', display, priority);
+    } else {
+      node.style.removeProperty('display');
+    }
+  }
+
   return ok;
+
 };
