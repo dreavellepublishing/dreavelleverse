@@ -143,7 +143,99 @@
     // Stop checking after the initial loading period.
     setTimeout(() => clearInterval(initialCheck), 12000);
 
- panel.append(heading, description, scanButton, result, autoStatus);
+    // Let writers review and apply suggested warning categories.
+    const suggestionBox = document.createElement("div");
+    suggestionBox.style.marginTop = "12px";
+    panel.append(suggestionBox);
+
+    const categoryNames = [
+      "Sexual content",
+      "Graphic violence",
+      "Abuse",
+      "Self-harm themes",
+      "Disturbing content",
+      "Substance use",
+      "Strong language"
+    ];
+
+    const updateSuggestions = () => {
+      suggestionBox.replaceChildren();
+
+      const content = area.value || "";
+      const matches = rules
+        .filter(rule =>
+          rule.terms.some(pattern => pattern.test(content))
+        )
+        .map(rule => rule.name)
+        .filter(name => categoryNames.includes(name));
+
+      if (!matches.length) return;
+
+      const heading = document.createElement("p");
+      heading.textContent =
+        "Suggested warnings (review before applying):";
+      suggestionBox.append(heading);
+
+      const applyButton = document.createElement("button");
+      applyButton.type = "button";
+      applyButton.textContent = "Apply Suggested Categories";
+      applyButton.style.cssText =
+        "padding:10px 14px;background:#873491;color:white;border:0;border-radius:8px;cursor:pointer;";
+
+      applyButton.addEventListener("click", () => {
+        const labels = [
+          ...document.querySelectorAll("label")
+        ];
+
+        let applied = 0;
+
+        for (const category of matches) {
+          const label = labels.find(item =>
+            item.textContent.trim().toLowerCase() ===
+            category.toLowerCase()
+          );
+
+          if (!label) continue;
+
+          const checkbox =
+            label.querySelector('input[type="checkbox"]') ||
+            (label.htmlFor
+              ? document.getElementById(label.htmlFor)
+              : null);
+
+          if (!checkbox || checkbox.type !== "checkbox") continue;
+
+          checkbox.checked = true;
+          checkbox.dispatchEvent(
+            new Event("change", {bubbles: true})
+          );
+          applied++;
+        }
+
+        const status = document.createElement("p");
+        status.textContent = applied
+          ? `${applied} suggested categories selected. Review and click Save Content Warnings to save them.`
+          : "Could not find the matching warning checkboxes. No settings were changed.";
+        suggestionBox.append(status);
+      });
+
+      suggestionBox.append(applyButton);
+    };
+
+    area.addEventListener("input", () => {
+      setTimeout(updateSuggestions, 1300);
+    });
+
+    scanButton.addEventListener("click", updateSuggestions);
+
+    panel.append(
+      heading,
+      description,
+      scanButton,
+      result,
+      autoStatus,
+      suggestionBox
+    );
     area.insertAdjacentElement("afterend", panel);
   };
 
