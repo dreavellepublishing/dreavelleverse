@@ -100,7 +100,50 @@
       result.append(reminder);
     });
 
-    panel.append(heading, description, scanButton, result);
+    // Automatically scan after the writer pauses typing.
+    let autoScanTimer;
+
+    const autoStatus = document.createElement("p");
+    autoStatus.style.cssText =
+      "font-size:13px;color:#666;margin-top:8px;";
+    autoStatus.textContent =
+      "Automatic content screening is active.";
+
+    const scheduleScan = () => {
+      clearTimeout(autoScanTimer);
+
+      autoStatus.textContent =
+        "Checking chapter content...";
+
+      autoScanTimer = setTimeout(() => {
+        if (area.value.trim()) {
+          scanButton.click();
+          autoStatus.textContent =
+            "Automatic check completed. Review any warnings above.";
+        } else {
+          result.replaceChildren();
+          autoStatus.textContent =
+            "Start writing to check for mature themes.";
+        }
+      }, 1200);
+    };
+
+    area.addEventListener("input", scheduleScan);
+
+    // Scan existing chapter content when the writer opens it.
+    // The editor may load saved content asynchronously.
+    let lastContent = area.value;
+    const initialCheck = setInterval(() => {
+      if (area.value !== lastContent) {
+        lastContent = area.value;
+        scheduleScan();
+      }
+    }, 1500);
+
+    // Stop checking after the initial loading period.
+    setTimeout(() => clearInterval(initialCheck), 12000);
+
+ panel.append(heading, description, scanButton, result, autoStatus);
     area.insertAdjacentElement("afterend", panel);
   };
 
