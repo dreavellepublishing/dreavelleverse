@@ -302,6 +302,53 @@
       suggestionBox
     );
     area.insertAdjacentElement("afterend", panel);
+     
+    // Remind writers about detected warnings before publishing.
+    // Advisory only: does not change saved settings or block publishing.
+    const publishingReminder = (event) => {
+      const button = event.target.closest("button");
+      if (!button) return;
+
+      const label = (button.textContent || "").trim().toLowerCase();
+
+      if (!/^(publish chapter|schedule chapter)$/.test(label)) {
+        return;
+      }
+
+      const detected = rules.filter(rule =>
+        rule.terms.some(pattern =>
+          pattern.test(area.value || "")
+        )
+      );
+
+      if (!detected.length) return;
+
+      const selectedWarnings = [
+        ...document.querySelectorAll('input[type="checkbox"]:checked')
+      ].map(input =>
+        (input.closest("label")?.textContent || "").trim().toLowerCase()
+      );
+
+      const missing = detected.filter(rule =>
+        !selectedWarnings.includes(rule.name.toLowerCase())
+      );
+
+      if (!missing.length) return;
+
+      const message =
+        "The content scanner detected possible mature themes:\n\n" +
+        missing.map(rule => "• " + rule.name).join("\n") +
+        "\n\nPlease review your Chapter Content Warnings. " +
+        "Press OK to continue or Cancel to review them first.";
+
+      if (!window.confirm(message)) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    };
+
+    document.addEventListener("click", publishingReminder, true);
+
   };
 
   if (document.readyState === "loading") {
