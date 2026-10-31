@@ -10,8 +10,9 @@
 
     <link rel="stylesheet" href="style.css?v=20261024-auto-continue-nav">
 
+
 <style>
-/* Hide reader interactions while the R18 warning is shown. */
+/* Hide reader controls while the R18 advisory is displayed */
 body:has(#chapter-content [aria-label="Mature chapter warning"])
 .reading-container > :not(#chapter-content)
 :not(#reading-story-title)
@@ -19,7 +20,18 @@ body:has(#chapter-content [aria-label="Mature chapter warning"])
 :not(#bible-verse-card) {
     display: none !important;
 }
+
+/* Hide completion and navigation controls outside the reading container */
+body:has(#chapter-content [aria-label="Mature chapter warning"])
+.reading-completion,
+body:has(#chapter-content [aria-label="Mature chapter warning"])
+.reading-navigation,
+body:has(#chapter-content [aria-label="Mature chapter warning"])
+#mark-completed-button {
+    display: none !important;
+}
 </style>
+
 
 </head>
 
