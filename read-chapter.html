@@ -10,6 +10,17 @@
 
     <link rel="stylesheet" href="style.css?v=20261024-auto-continue-nav">
 
+<style>
+/* Hide reader interactions while the R18 warning is shown. */
+body:has(#chapter-content [aria-label="Mature chapter warning"])
+.reading-container > :not(#chapter-content)
+:not(#reading-story-title)
+:not(#reading-chapter-title)
+:not(#bible-verse-card) {
+    display: none !important;
+}
+</style>
+
 </head>
 
 
