@@ -1145,7 +1145,9 @@ if (storyPublishError) {
             saveStatus.textContent = "Published";
         }
 
-        publishChapterButton.textContent = "Published";
+        // Refresh both buttons after Supabase confirms publication.
+        // This also reveals Unpublish for newly published chapters.
+        await loadChapterPublishStatus();
 
         /* Create Notification for Followed Story */
 
