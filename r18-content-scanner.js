@@ -306,8 +306,10 @@
     // Remind writers about detected warnings before publishing.
     // Advisory only: does not change saved settings or block publishing.
     const publishingReminder = (event) => {
-      const button = event.target.closest("button");
-      if (!button) return;
+      const button = event.target.closest(
+  ".publish-chapter-button, #publish-chapter-button, #schedule-chapter-button"
+);
+if (!button) return;
 
       const label = (button.textContent || "").trim().toLowerCase();
 
