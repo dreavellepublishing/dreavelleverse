@@ -7,36 +7,101 @@
     const area = document.querySelector(".chapter-writing-area");
     if (!area || document.getElementById("dv-r18-scanner")) return;
 
+   
     const rules = [
       {
         name: "Sexual content",
-        terms: [/\bexplicit sex\b/i, /\bsexual intercourse\b/i, /\bsexual assault\b/i, /\bsex scene\b/i]
+        terms: [
+          /\bexplicit sex\b/i,
+          /\bsexual intercourse\b/i,
+          /\bsexual assault\b/i,
+          /\bsex scene\b/i,
+          /\bpanggagahasa\b/i,
+          /\bginahasa\b/i,
+          /\bsekswal na pang-aabuso\b/i,
+          /\bsekswal na karahasan\b/i
+        ]
       },
       {
         name: "Graphic violence",
-        terms: [/\bgore\b/i, /\bdismember(?:ed|ment)?\b/i, /\bgraphic violence\b/i, /\bbrutal torture\b/i]
+        terms: [
+          /\bgore\b/i,
+          /\bdismember(?:ed|ment)?\b/i,
+          /\bgraphic violence\b/i,
+          /\bbrutal torture\b/i,
+          /\bkarumal-dumal na pagpatay\b/i,
+          /\bmalubhang karahasan\b/i,
+          /\bpinagpuputol ang katawan\b/i,
+          /\bmatinding pagpapahirap\b/i
+        ]
       },
       {
         name: "Abuse",
-        terms: [/\bdomestic abuse\b/i, /\bchild abuse\b/i, /\bphysical abuse\b/i, /\bsexual abuse\b/i]
+        terms: [
+          /\bdomestic abuse\b/i,
+          /\bchild abuse\b/i,
+          /\bphysical abuse\b/i,
+          /\bsexual abuse\b/i,
+          /\bpang-aabuso\b/i,
+          /\binaabuso\b/i,
+          /\bkarahasan sa tahanan\b/i,
+          /\bpananakit sa bata\b/i,
+          /\bsekswal na pang-aabuso\b/i
+        ]
       },
       {
         name: "Self-harm themes",
-        terms: [/\bself[- ]harm\b/i, /\bsuicid(?:e|al)\b/i, /\bcutting myself\b/i]
+        terms: [
+          /\bself[- ]harm\b/i,
+          /\bsuicid(?:e|al)\b/i,
+          /\bcutting myself\b/i,
+          /\bpagpapakamatay\b/i,
+          /\bmagpakamatay\b/i,
+          /\bnagpakamatay\b/i,
+          /\bsaktan ang sarili\b/i,
+          /\bpananakit sa sarili\b/i
+        ]
       },
       {
         name: "Substance use",
-        terms: [/\bdrug overdose\b/i, /\bheroin\b/i, /\bcocaine\b/i, /\bsubstance abuse\b/i]
+        terms: [
+          /\bdrug overdose\b/i,
+          /\bheroin\b/i,
+          /\bcocaine\b/i,
+          /\bsubstance abuse\b/i,
+          /\bilegal na droga\b/i,
+          /\bpag-abuso sa droga\b/i,
+          /\blabis na paggamit ng droga\b/i
+        ]
       },
       {
         name: "Disturbing content",
-        terms: [/\bkidnapping\b/i, /\bhostage\b/i, /\btrafficking\b/i, /\bpsychological torture\b/i]
+        terms: [
+          /\bkidnapping\b/i,
+          /\bhostage\b/i,
+          /\btrafficking\b/i,
+          /\bpsychological torture\b/i,
+          /\bpagdukot\b/i,
+          /\bkinidnap\b/i,
+          /\bpagpapahirap\b/i,
+          /\bhuman trafficking\b/i,
+          /\bkalakalan ng tao\b/i
+        ]
       },
       {
         name: "Strong language",
-        terms: [/\bfuck(?:ing|ed)?\b/i, /\bmotherfucker\b/i]
+        terms: [
+          /\bfuck(?:ing|ed)?\b/i,
+          /\bmotherfucker\b/i,
+          /\bputang ina\b/i,
+          /\bputangina\b/i,
+          /\bpunyeta\b/i,
+          /\bgago\b/i,
+          /\btangina\b/i
+        ]
       }
     ];
+
 
     const panel = document.createElement("section");
     panel.id = "dv-r18-scanner";
