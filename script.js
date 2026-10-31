@@ -2155,15 +2155,31 @@ if (chapterContent) {
                 story.title || "Untitled Story";
         }
 
-        const { data: chapter, error: chapterError } =
-            await supabaseClient
-                .from("chapters")
-                .select("title, content, status")
-                .eq("story_id", storyId)
-                .eq("chapter_number", chapterNumber)
-                .eq("status", "Published")
-                .maybeSingle();
-
+        // Read warning metadata before requesting chapter text.
+        // Birthday self-declaration is an advisory only; it is NOT verified age assurance.
+        const { data: chapterMeta, error: metaError } = await supabaseClient
+            .from("chapters")
+            .select("title,status,is_r18,content_warning_level,content_warning_categories")
+            .eq("story_id", storyId)
+            .eq("chapter_number", chapterNumber)
+            .eq("status", "Published")
+            .maybeSingle();
+        if (metaError) { chapterContent.textContent = "Unable to load chapter information."; return; }
+        if (!chapterMeta) { chapterContent.textContent = "This chapter is unavailable."; return; }
+        if (readingChapterTitle) readingChapterTitle.textContent = chapterMeta.title || `Chapter ${chapterNumber}`;
+        const isRestricted = chapterMeta.is_r18 === true ||
+            String(chapterMeta.content_warning_level || "").toLowerCase().includes("r18");
+        if (isRestricted) {
+            const allowed = await window.dvR18SelfDeclarationGate({storyId,chapterNumber,chapterMeta,supabaseClient});
+            if (!allowed) return;
+        }
+        const { data: chapter, error: chapterError } = await supabaseClient
+            .from("chapters")
+            .select("title,content,status")
+            .eq("story_id", storyId)
+            .eq("chapter_number", chapterNumber)
+            .eq("status", "Published")
+            .maybeSingle();
         if (chapterError) {
             console.error(
                 "Could not load published chapter:",
